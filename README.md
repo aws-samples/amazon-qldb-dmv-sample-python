@@ -7,7 +7,7 @@ The samples in this project demonstrate several uses of Amazon Quantum Ledger Da
 ### Basic Configuration
 
 You need to set up your AWS security credentials and config before the sample code is able
-to connect to AWS. 
+to connect to AWS.
 
 Set up credentials (in e.g. `~/.aws/credentials`):
 
@@ -63,6 +63,10 @@ $ pip install -e .
 $ cd docs
 $ make html
 ```
+
+### Release 1.0.0-rc.2 (October 29, 2019)
+
+* Fixes for small documentation issues.
 
 ### Release 1.0.0-rc.1 (October 28, 2019)
 

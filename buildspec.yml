@@ -20,7 +20,7 @@ phases:
       - pip install -e .
   #build:
     #commands:
-      #- THere are no build commands
+      #- There are no build commands
   post_build:
     commands:
       - python setup.py sdist bdist_wheel
