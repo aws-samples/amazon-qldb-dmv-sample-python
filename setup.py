@@ -22,7 +22,7 @@ VERSION_RE = re.compile(r'''__version__ = ['"]([0-9.a-z\-]+)['"]''')
 requires = ['amazon.ion>=0.5.0',
             'boto3>=1.9.237',
             'botocore>=1.12.237',
-            'pyqldb==1.0.0-rc.1'
+            'pyqldb>=1.0.0-rc.1'
             ]
 
 
@@ -36,6 +36,7 @@ setuptools.setup(
     version=get_version(),
     description='Sample app for Amazon QLDB',
     long_description=open('README.md').read(),
+    long_description_content_type='text/markdown',
     author='Amazon Web Services',
     packages=setuptools.find_packages(),
     install_requires=requires,
