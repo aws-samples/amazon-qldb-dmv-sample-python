@@ -2,6 +2,8 @@
 
 The samples in this project demonstrate several uses of Amazon Quantum Ledger Database (QLDB).
 
+For our tutorial, see [Python and Amazon QLDB](https://docs.aws.amazon.com/qldb/latest/developerguide/getting-started.python.html).
+
 ## Requirements
 
 ### Basic Configuration
