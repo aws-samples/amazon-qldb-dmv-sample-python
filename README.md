@@ -1,4 +1,4 @@
-# AmazonQLDB Samples
+# Amazon QLDB Python DMV Sample App
 
 The samples in this project demonstrate several uses of Amazon Quantum Ledger Database (QLDB).
 
@@ -8,26 +8,7 @@ For our tutorial, see [Python and Amazon QLDB](https://docs.aws.amazon.com/qldb/
 
 ### Basic Configuration
 
-You need to set up your AWS security credentials and config before the sample code is able
-to connect to AWS.
-
-Set up credentials (in e.g. `~/.aws/credentials`):
-
-```
-[default]
-aws_access_key_id = <your access key id>
-aws_secret_access_key = <your secret key>
-```
-
-Set up a default region (in e.g. `~/.aws/config`):
-
-```
-[default]
-region = us-east-1 <or other region>
-```
-
-See [Accessing Amazon QLDB](https://docs.aws.amazon.com/qldb/latest/developerguide/accessing.html#SettingUp.Q.GetCredentials) page for more information.
-
+See [Accessing Amazon QLDB](https://docs.aws.amazon.com/qldb/latest/developerguide/accessing.html) for information on connecting to AWS.
 
 ### Python 3.x
 
