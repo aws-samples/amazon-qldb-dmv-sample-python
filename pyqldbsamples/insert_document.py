@@ -50,7 +50,7 @@ def insert_documents(transaction_executor, table_name, documents):
     """
     Insert the given list of documents into a table in a single transaction.
 
-    :type transaction_executor: :py:class:`pyqldb.session.executor.Executor`
+    :type transaction_executor: :py:class:`pyqldb.execution.executor.Executor`
     :param transaction_executor: An Executor object allowing for execution of statements within a transaction.
 
     :type table_name: str
@@ -64,7 +64,7 @@ def insert_documents(transaction_executor, table_name, documents):
     """
     logger.info('Inserting some documents in the {} table...'.format(table_name))
     statement = 'INSERT INTO {} ?'.format(table_name)
-    cursor = transaction_executor.execute_statement(statement, [convert_object_to_ion(documents)])
+    cursor = transaction_executor.execute_statement(statement, convert_object_to_ion(documents))
     list_of_document_ids = get_document_ids_from_dml_results(cursor)
 
     return list_of_document_ids
@@ -74,7 +74,7 @@ def update_and_insert_documents(transaction_executor):
     """
     Handle the insertion of documents and updating PersonIds all in a single transaction.
 
-    :type transaction_executor: :py:class:`pyqldb.session.executor.Executor`
+    :type transaction_executor: :py:class:`pyqldb.execution.executor.Executor`
     :param transaction_executor: An Executor object allowing for execution of statements within a transaction.
     """
     list_ids = insert_documents(transaction_executor, Constants.PERSON_TABLE_NAME, SampleData.PERSON)

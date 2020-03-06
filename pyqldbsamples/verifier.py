@@ -21,7 +21,6 @@ from base64 import b64encode
 from functools import reduce
 from hashlib import sha256
 from random import randrange
-from re import search
 
 from amazon.ion.simpleion import loads
 

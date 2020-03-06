@@ -29,7 +29,7 @@ logger = getLogger(__name__)
 basicConfig(level=INFO)
 
 
-def execute_transaction(qldb_session, transaction, statement, parameters):
+def execute_transaction(qldb_session, transaction, statement, parameter):
     """
     Execute statement with parameters. If it was unsuccessful, retry with a new transaction.
 
@@ -42,12 +42,13 @@ def execute_transaction(qldb_session, transaction, statement, parameters):
     :type statement: str
     :param statement: The query to execute.
 
-    :type parameters: list
-    :param parameters: list of parameters in Ion format.
+    :type parameter: :py:class:`amazon.ion.simple_types.IonPyValue`
+    :param parameter: The Ion value or Python native type that is convertible to Ion for filling in parameters of the
+                      statement.
     """
     for i in range(Constants.RETRY_LIMIT):
         try:
-            transaction.execute_statement(statement, parameters)
+            transaction.execute_statement(statement, parameter)
             logger.info('Execute successful after {} retries.'.format(i))
             break
         except ClientError as ce:
@@ -56,7 +57,7 @@ def execute_transaction(qldb_session, transaction, statement, parameters):
                 transaction = qldb_session.start_transaction()
 
 
-def commit_transaction(qldb_session, transaction, statement, parameters):
+def commit_transaction(qldb_session, transaction, statement, parameter):
     """
     Commit the transaction and retry up to a constant number of times.
 
@@ -69,8 +70,9 @@ def commit_transaction(qldb_session, transaction, statement, parameters):
     :type statement: str
     :param statement: The query to execute.
 
-    :type parameters: list
-    :param parameters: list of parameters in Ion format.
+    :type parameter: :py:class:`amazon.ion.simple_types.IonPyValue`
+    :param parameter: The Ion value or Python native type that is convertible to Ion for filling in parameters of the
+                      statement.
     """
     for i in range(Constants.RETRY_LIMIT):
         try:
@@ -81,7 +83,7 @@ def commit_transaction(qldb_session, transaction, statement, parameters):
             if is_occ_conflict_exception(ce):
                 logger.error('Commit failed due to an OCC conflict. Restart transaction.')
                 transaction = qldb_session.start_transaction()
-                execute_transaction(qldb_session, transaction, statement, parameters)
+                execute_transaction(qldb_session, transaction, statement, parameter)
 
 
 if __name__ == '__main__':
@@ -91,7 +93,7 @@ if __name__ == '__main__':
     In this example, two sessions on the same ledger try to access the registration city for the same Vehicle Id.
     """
     vehicle_vin = SampleData.VEHICLE_REGISTRATION[0]['VIN']
-    parameters = [convert_object_to_ion(vehicle_vin)]
+    parameters = convert_object_to_ion(vehicle_vin)
     query1 = "UPDATE VehicleRegistration AS v SET v.City = 'Tukwila' WHERE v.VIN = ?"
     query2 = 'SELECT City FROM VehicleRegistration AS v WHERE v.VIN = ?'
 

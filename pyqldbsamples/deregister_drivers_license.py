@@ -29,7 +29,7 @@ def deregister_drivers_license(transaction_executor, license_number):
     """
     De-register a driver's license with the given license number.
 
-    :type transaction_executor: :py:class:`pyqldb.session.executor.Executor`
+    :type transaction_executor: :py:class:`pyqldb.execution.executor.Executor`
     :param transaction_executor: An Executor object allowing for execution of statements within a transaction.
 
     :type license_number: str
@@ -37,7 +37,7 @@ def deregister_drivers_license(transaction_executor, license_number):
     """
     logger.info('De-registering license with license number: {}.'.format(license_number))
     statement = 'DELETE FROM DriversLicense AS d WHERE d.LicenseNumber = ?'
-    parameter = [convert_object_to_ion(license_number)]
+    parameter = convert_object_to_ion(license_number)
     cursor = transaction_executor.execute_statement(statement, parameter)
 
     try:
