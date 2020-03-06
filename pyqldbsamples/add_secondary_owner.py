@@ -31,7 +31,7 @@ def get_document_id_by_gov_id(transaction_executor, government_id):
     """
     Find a driver's person ID using the given government ID.
 
-    :type transaction_executor: :py:class:`pyqldb.session.executor.Executor`
+    :type transaction_executor: :py:class:`pyqldb.execution.executor.Executor`
     :param transaction_executor: An Executor object allowing for execution of statements within a transaction.
 
     :type government_id: str
@@ -48,7 +48,7 @@ def is_secondary_owner_for_vehicle(transaction_executor, vin, secondary_owner_id
     """
     Check whether a secondary owner has already been registered for the given VIN.
 
-    :type transaction_executor: :py:class:`pyqldb.session.executor.Executor`
+    :type transaction_executor: :py:class:`pyqldb.execution.executor.Executor`
     :param transaction_executor: An Executor object allowing for execution of statements within a transaction.
 
     :type vin: str
@@ -62,8 +62,7 @@ def is_secondary_owner_for_vehicle(transaction_executor, vin, secondary_owner_id
     """
     logger.info('Finding secondary owners for vehicle with VIN: {}...'.format(vin))
     query = 'SELECT Owners.SecondaryOwners FROM VehicleRegistration AS v WHERE v.VIN = ?'
-    parameters = [convert_object_to_ion(vin)]
-    rows = transaction_executor.execute_statement(query, parameters)
+    rows = transaction_executor.execute_statement(query, convert_object_to_ion(vin))
 
     for row in rows:
         secondary_owners = row.get('SecondaryOwners')
@@ -73,23 +72,25 @@ def is_secondary_owner_for_vehicle(transaction_executor, vin, secondary_owner_id
     return False
 
 
-def add_secondary_owner_for_vin(transaction_executor, vin, parameters):
+def add_secondary_owner_for_vin(transaction_executor, vin, parameter):
     """
     Add a secondary owner into `VehicleRegistration` table for a particular VIN.
 
-    :type transaction_executor: :py:class:`pyqldb.session.executor.Executor`
+    :type transaction_executor: :py:class:`pyqldb.execution.executor.Executor`
     :param transaction_executor: An Executor object allowing for execution of statements within a transaction.
 
     :type vin: str
     :param vin: VIN of the vehicle to add a secondary owner for.
 
-    :type parameters: list
-    :param parameters: list of parameters in Ion format.
+    :type parameter: :py:class:`amazon.ion.simple_types.IonPyValue`
+    :param parameter: The Ion value or Python native type that is convertible to Ion for filling in parameters of the
+                      statement.
     """
     logger.info('Inserting secondary owner for vehicle with VIN: {}...'.format(vin))
-    statement = "FROM VehicleRegistration AS v WHERE v.VIN = '{}' INSERT INTO v.Owners.SecondaryOwners VALUE ?".format(vin)
+    statement = "FROM VehicleRegistration AS v WHERE v.VIN = '{}' INSERT INTO v.Owners.SecondaryOwners VALUE ?"\
+        .format(vin)
 
-    cursor = transaction_executor.execute_statement(statement, parameters)
+    cursor = transaction_executor.execute_statement(statement, parameter)
     logger.info('VehicleRegistration Document IDs which had secondary owners added: ')
     print_result(cursor)
 
@@ -98,7 +99,7 @@ def register_secondary_owner(transaction_executor, vin, gov_id):
     """
     Register a secondary owner for a vehicle if they are not already registered.
 
-    :type transaction_executor: :py:class:`pyqldb.session.executor.Executor`
+    :type transaction_executor: :py:class:`pyqldb.execution.executor.Executor`
     :param transaction_executor: An Executor object allowing for execution of statements within a transaction.
 
     :type vin: str
@@ -114,7 +115,7 @@ def register_secondary_owner(transaction_executor, vin, gov_id):
         if is_secondary_owner_for_vehicle(transaction_executor, vin, document_id):
             logger.info('Person with ID {} has already been added as a secondary owner of this vehicle.'.format(gov_id))
         else:
-            add_secondary_owner_for_vin(transaction_executor, vin, [to_ion_struct('PersonId', document_id)])
+            add_secondary_owner_for_vin(transaction_executor, vin, to_ion_struct('PersonId', document_id))
 
 
 if __name__ == '__main__':

@@ -32,7 +32,7 @@ def person_already_exists(transaction_executor, gov_id):
     """
     Verify whether a driver already exists in the database.
 
-    :type transaction_executor: :py:class:`pyqldb.session.executor.Executor`
+    :type transaction_executor: :py:class:`pyqldb.execution.executor.Executor`
     :param transaction_executor: An Executor object allowing for execution of statements within a transaction.
 
     :type gov_id: str
@@ -42,8 +42,7 @@ def person_already_exists(transaction_executor, gov_id):
     :return: If the Person has been registered.
     """
     query = 'SELECT * FROM Person AS p WHERE p.GovId = ?'
-    parameters = [convert_object_to_ion(gov_id)]
-    cursor = transaction_executor.execute_statement(query, parameters)
+    cursor = transaction_executor.execute_statement(query, convert_object_to_ion(gov_id))
     try:
         next(cursor)
         return True
@@ -55,7 +54,7 @@ def person_has_drivers_license(transaction_executor, document_id):
     """
     Check if the driver already has a driver's license using their unique document ID.
 
-    :type transaction_executor: :py:class:`pyqldb.session.executor.Executor`
+    :type transaction_executor: :py:class:`pyqldb.execution.executor.Executor`
     :param transaction_executor: An Executor object allowing for execution of statements within a transaction.
 
     :type document_id: str
@@ -76,7 +75,7 @@ def lookup_drivers_license_for_person(transaction_executor, person_id):
     """
     Query drivers license table by person ID.
 
-    :type transaction_executor: :py:class:`pyqldb.session.executor.Executor`
+    :type transaction_executor: :py:class:`pyqldb.execution.executor.Executor`
     :param transaction_executor: An Executor object allowing for execution of statements within a transaction.
 
     :type person_id: str
@@ -86,7 +85,7 @@ def lookup_drivers_license_for_person(transaction_executor, person_id):
     :return: Cursor on the result set of a statement query.
     """
     query = 'SELECT * FROM DriversLicense AS d WHERE d.PersonId = ?'
-    cursor = transaction_executor.execute_statement(query, [person_id])
+    cursor = transaction_executor.execute_statement(query, person_id)
     return cursor
 
 
@@ -94,7 +93,7 @@ def register_new_driver(transaction_executor, driver):
     """
     Register a new driver in QLDB if not already registered.
 
-    :type transaction_executor: :py:class:`pyqldb.session.executor.Executor`
+    :type transaction_executor: :py:class:`pyqldb.execution.executor.Executor`
     :param transaction_executor: An Executor object allowing for execution of statements within a transaction.
 
     :type driver: dict
@@ -114,7 +113,7 @@ def register_new_drivers_license(transaction_executor, driver, new_license):
     """
     Register a new driver and a new driver's license in a single transaction.
 
-    :type transaction_executor: :py:class:`pyqldb.session.executor.Executor`
+    :type transaction_executor: :py:class:`pyqldb.execution.executor.Executor`
     :param transaction_executor: An Executor object allowing for execution of statements within a transaction.
 
     :type driver: dict
@@ -132,7 +131,7 @@ def register_new_drivers_license(transaction_executor, driver, new_license):
         # Update the new license with new driver's unique PersonId.
         new_license.update({'PersonId': str(person_id)})
         statement = 'INSERT INTO DriversLicense ?'
-        transaction_executor.execute_statement(statement, [convert_object_to_ion(new_license)])
+        transaction_executor.execute_statement(statement, convert_object_to_ion(new_license))
 
         cursor = lookup_drivers_license_for_person(transaction_executor, person_id)
         try:
@@ -166,6 +165,6 @@ if __name__ == '__main__':
                 'ValidToDate': datetime(2022, 10, 30)
             }
             session.execute_lambda(lambda executor: register_new_drivers_license(executor, new_driver, drivers_license),
-                                   lambda retry_attempt: logger.info('Retrying due to OCC conflict...'))
+                                   retry_indicator=lambda retry_attempt: logger.info('Retrying due to OCC conflict...'))
     except Exception:
         logger.exception('Error registering new driver.')

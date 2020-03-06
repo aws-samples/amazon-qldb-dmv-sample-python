@@ -69,4 +69,3 @@ def digest_response_to_string(digest_response):
         string += 'DigestTipAddress: ' + value_holder_to_string(digest_response['DigestTipAddress']['IonText'])
 
     return '{' + string + '}'
-

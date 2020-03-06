@@ -34,16 +34,19 @@ from pyqldbsamples.connect_to_ledger import create_qldb_session
 logger = getLogger(__name__)
 basicConfig(level=INFO)
 
+TABLE_NAME = 'IonTypes'
 
-def update_record_and_verify_type(transaction_executor, parameters, ion_object, ion_type):
+
+def update_record_and_verify_type(transaction_executor, parameter, ion_object, ion_type):
     """
     Update a record in the database table. Then query the value of the record and verify correct ion type saved.
 
-    :type transaction_executor: :py:class:`pyqldb.session.executor.Executor`
+    :type transaction_executor: :py:class:`pyqldb.execution.executor.Executor`
     :param transaction_executor: An Executor object allowing for execution of statements within a transaction.
 
-    :type parameters: list
-    :param parameters: list of parameters in Ion format.
+    :type parameter: :py:class:`amazon.ion.simple_types.IonPyValue`
+    :param parameter: The Ion value or Python native type that is convertible to Ion for filling in parameters of the
+                      statement.
 
     :type ion_object: :py:obj:`IonPyBool`/:py:obj:`IonPyBytes`/:py:obj:`IonPyDecimal`/:py:obj:`IonPyDict`
                       /:py:obj:`IonPyFloat`/:py:obj:`IonPyInt`/:py:obj:`IonPyList`/:py:obj:`IonPyNull`
@@ -56,7 +59,7 @@ def update_record_and_verify_type(transaction_executor, parameters, ion_object, 
     :raises TypeError: When queried value is not an instance of Ion type.
     """
     update_query = 'UPDATE {} SET Name = ?'.format(TABLE_NAME)
-    transaction_executor.execute_statement(update_query, parameters)
+    transaction_executor.execute_statement(update_query, parameter)
     logger.info('Updated record.')
 
     search_query = 'SELECT VALUE Name FROM {}'.format(TABLE_NAME)
@@ -77,7 +80,7 @@ def delete_table(transaction_executor, table_name):
     """
     Delete a table.
 
-    :type transaction_executor: :py:class:`pyqldb.session.executor.Executor`
+    :type transaction_executor: :py:class:`pyqldb.execution.executor.Executor`
     :param transaction_executor: An Executor object allowing for execution of statements within a transaction.
 
     :type table_name: str
@@ -92,95 +95,135 @@ def delete_table(transaction_executor, table_name):
     return len(list(cursor))
 
 
-TABLE_NAME = 'IonTypes'
+def insert_and_verify_ion_types(session):
+    """
+    Insert all the supported Ion types and Python values that are convertible to Ion into a ledger and verify that they
+    are stored and can be retrieved properly, retaining their original properties.
+
+    :type session: :py:class:`pyqldb.session.base_qldb_session.BaseQldbSession`
+    :param session: A QLDB session object.
+    """
+    python_bytes = str.encode('hello')
+    python_bool = True
+    python_float = float('0.2')
+    python_decimal = Decimal('0.1')
+    python_string = "string"
+    python_int = 1
+    python_null = None
+    python_datetime = datetime(2016, 12, 20, 5, 23, 43)
+    python_list = [1, 2]
+    python_dict = {"brand": "Ford"}
+
+    ion_clob = convert_object_to_ion(loads('{{"This is a CLOB of text."}}'))
+    ion_blob = convert_object_to_ion(python_bytes)
+    ion_bool = convert_object_to_ion(python_bool)
+    ion_decimal = convert_object_to_ion(python_decimal)
+    ion_float = convert_object_to_ion(python_float)
+    ion_int = convert_object_to_ion(python_int)
+    ion_list = convert_object_to_ion(python_list)
+    ion_null = convert_object_to_ion(python_null)
+    ion_sexp = convert_object_to_ion(loads('(cons 1 2)'))
+    ion_string = convert_object_to_ion(python_string)
+    ion_struct = convert_object_to_ion(python_dict)
+    ion_symbol = convert_object_to_ion(SymbolToken(text='abc', sid=123))
+    ion_timestamp = convert_object_to_ion(python_datetime)
+
+    ion_null_clob = convert_object_to_ion(loads('null.clob'))
+    ion_null_blob = convert_object_to_ion(loads('null.blob'))
+    ion_null_bool = convert_object_to_ion(loads('null.bool'))
+    ion_null_decimal = convert_object_to_ion(loads('null.decimal'))
+    ion_null_float = convert_object_to_ion(loads('null.float'))
+    ion_null_int = convert_object_to_ion(loads('null.int'))
+    ion_null_list = convert_object_to_ion(loads('null.list'))
+    ion_null_sexp = convert_object_to_ion(loads('null.sexp'))
+    ion_null_string = convert_object_to_ion(loads('null.string'))
+    ion_null_struct = convert_object_to_ion(loads('null.struct'))
+    ion_null_symbol = convert_object_to_ion(loads('null.symbol'))
+    ion_null_timestamp = convert_object_to_ion(loads('null.timestamp'))
+
+    session.execute_lambda(lambda transaction_executor: create_table(transaction_executor, TABLE_NAME)
+                           and insert_documents(transaction_executor, TABLE_NAME, [{'Name': 'val'}])
+                           and update_record_and_verify_type(transaction_executor, python_bytes, IonPyBytes,
+                                                             IonType.BLOB)
+                           and update_record_and_verify_type(transaction_executor, python_bool, IonPyBool,
+                                                             IonType.BOOL)
+                           and update_record_and_verify_type(transaction_executor, python_float, IonPyFloat,
+                                                             IonType.FLOAT)
+                           and update_record_and_verify_type(transaction_executor, python_decimal, IonPyDecimal,
+                                                             IonType.DECIMAL)
+                           and update_record_and_verify_type(transaction_executor, python_string, IonPyText,
+                                                             IonType.STRING)
+                           and update_record_and_verify_type(transaction_executor, python_int, IonPyInt,
+                                                             IonType.INT)
+                           and update_record_and_verify_type(transaction_executor, python_null, IonPyNull,
+                                                             IonType.NULL)
+                           and update_record_and_verify_type(transaction_executor, python_datetime,
+                                                             IonPyTimestamp, IonType.TIMESTAMP)
+                           and update_record_and_verify_type(transaction_executor, python_list, IonPyList,
+                                                             IonType.LIST)
+                           and update_record_and_verify_type(transaction_executor, python_dict, IonPyDict,
+                                                             IonType.STRUCT)
+                           and update_record_and_verify_type(transaction_executor, ion_clob, IonPyBytes,
+                                                             IonType.CLOB)
+                           and update_record_and_verify_type(transaction_executor, ion_blob, IonPyBytes,
+                                                             IonType.BLOB)
+                           and update_record_and_verify_type(transaction_executor, ion_bool, IonPyBool,
+                                                             IonType.BOOL)
+                           and update_record_and_verify_type(transaction_executor, ion_decimal, IonPyDecimal,
+                                                             IonType.DECIMAL)
+                           and update_record_and_verify_type(transaction_executor, ion_float, IonPyFloat,
+                                                             IonType.FLOAT)
+                           and update_record_and_verify_type(transaction_executor, ion_int, IonPyInt,
+                                                             IonType.INT)
+                           and update_record_and_verify_type(transaction_executor, ion_list, IonPyList,
+                                                             IonType.LIST)
+                           and update_record_and_verify_type(transaction_executor, ion_null, IonPyNull,
+                                                             IonType.NULL)
+                           and update_record_and_verify_type(transaction_executor, ion_sexp, IonPyList,
+                                                             IonType.SEXP)
+                           and update_record_and_verify_type(transaction_executor, ion_string, IonPyText,
+                                                             IonType.STRING)
+                           and update_record_and_verify_type(transaction_executor, ion_struct, IonPyDict,
+                                                             IonType.STRUCT)
+                           and update_record_and_verify_type(transaction_executor, ion_symbol, IonPySymbol,
+                                                             IonType.SYMBOL)
+                           and update_record_and_verify_type(transaction_executor, ion_timestamp,
+                                                             IonPyTimestamp, IonType.TIMESTAMP)
+                           and update_record_and_verify_type(transaction_executor, ion_null_clob, IonPyNull,
+                                                             IonType.CLOB)
+                           and update_record_and_verify_type(transaction_executor, ion_null_blob, IonPyNull,
+                                                             IonType.BLOB)
+                           and update_record_and_verify_type(transaction_executor, ion_null_bool, IonPyNull,
+                                                             IonType.BOOL)
+                           and update_record_and_verify_type(transaction_executor, ion_null_decimal,
+                                                             IonPyNull, IonType.DECIMAL)
+                           and update_record_and_verify_type(transaction_executor, ion_null_float, IonPyNull,
+                                                             IonType.FLOAT)
+                           and update_record_and_verify_type(transaction_executor, ion_null_int, IonPyNull,
+                                                             IonType.INT)
+                           and update_record_and_verify_type(transaction_executor, ion_null_list, IonPyNull,
+                                                             IonType.LIST)
+                           and update_record_and_verify_type(transaction_executor, ion_null_sexp, IonPyNull,
+                                                             IonType.SEXP)
+                           and update_record_and_verify_type(transaction_executor, ion_null_string, IonPyNull,
+                                                             IonType.STRING)
+                           and update_record_and_verify_type(transaction_executor, ion_null_struct, IonPyNull,
+                                                             IonType.STRUCT)
+                           and update_record_and_verify_type(transaction_executor, ion_null_symbol, IonPyNull,
+                                                             IonType.SYMBOL)
+                           and update_record_and_verify_type(transaction_executor, ion_null_timestamp,
+                                                             IonPyNull, IonType.TIMESTAMP)
+                           and delete_table(transaction_executor, TABLE_NAME),
+                           lambda retry_attempt: logger.info('Retrying due to OCC conflict...'))
+
 
 if __name__ == '__main__':
     """
-    Insert all the supported Ion types into a ledger and verify that they are stored and can be retrieved properly, 
-    retaining their original properties.
+    Insert all the supported Ion types and Python values that are convertible to Ion into a ledger and verify that they
+    are stored and can be retrieved properly, retaining their original properties.
     """
     try:
         with create_qldb_session() as session:
-            ion_clob = convert_object_to_ion(loads('{{"This is a CLOB of text."}}'))
-            ion_blob = convert_object_to_ion(str.encode('hello'))
-            ion_bool = convert_object_to_ion(True)
-            ion_decimal = convert_object_to_ion(Decimal('0.1'))
-            ion_float = convert_object_to_ion(float('0.2'))
-            ion_int = convert_object_to_ion(1)
-            ion_list = convert_object_to_ion([1, 2])
-            ion_null = convert_object_to_ion(None)
-            ion_sexp = convert_object_to_ion(loads('(cons 1 2)'))
-            ion_string = convert_object_to_ion("string")
-            ion_struct = convert_object_to_ion({"brand": "Ford"})
-            ion_symbol = convert_object_to_ion(SymbolToken(text='abc', sid=123))
-            ion_timestamp = convert_object_to_ion(datetime(2016, 12, 20, 5, 23, 43))
-
-            ion_null_clob = convert_object_to_ion(loads('null.clob'))
-            ion_null_blob = convert_object_to_ion(loads('null.blob'))
-            ion_null_bool = convert_object_to_ion(loads('null.bool'))
-            ion_null_decimal = convert_object_to_ion(loads('null.decimal'))
-            ion_null_float = convert_object_to_ion(loads('null.float'))
-            ion_null_int = convert_object_to_ion(loads('null.int'))
-            ion_null_list = convert_object_to_ion(loads('null.list'))
-            ion_null_sexp = convert_object_to_ion(loads('null.sexp'))
-            ion_null_string = convert_object_to_ion(loads('null.string'))
-            ion_null_struct = convert_object_to_ion(loads('null.struct'))
-            ion_null_symbol = convert_object_to_ion(loads('null.symbol'))
-            ion_null_timestamp = convert_object_to_ion(loads('null.timestamp'))
-
-            session.execute_lambda(lambda transaction_executor: create_table(transaction_executor, TABLE_NAME)
-                                   and insert_documents(transaction_executor, TABLE_NAME, [{'Name': 'val'}])
-                                   and update_record_and_verify_type(transaction_executor, [ion_clob], IonPyBytes,
-                                                                     IonType.CLOB)
-                                   and update_record_and_verify_type(transaction_executor, [ion_blob], IonPyBytes,
-                                                                     IonType.BLOB)
-                                   and update_record_and_verify_type(transaction_executor, [ion_bool], IonPyBool,
-                                                                     IonType.BOOL)
-                                   and update_record_and_verify_type(transaction_executor, [ion_decimal], IonPyDecimal,
-                                                                     IonType.DECIMAL)
-                                   and update_record_and_verify_type(transaction_executor, [ion_float], IonPyFloat,
-                                                                     IonType.FLOAT)
-                                   and update_record_and_verify_type(transaction_executor, [ion_int], IonPyInt,
-                                                                     IonType.INT)
-                                   and update_record_and_verify_type(transaction_executor, [ion_list], IonPyList,
-                                                                     IonType.LIST)
-                                   and update_record_and_verify_type(transaction_executor, [ion_null], IonPyNull,
-                                                                     IonType.NULL)
-                                   and update_record_and_verify_type(transaction_executor, [ion_sexp], IonPyList,
-                                                                     IonType.SEXP)
-                                   and update_record_and_verify_type(transaction_executor, [ion_string], IonPyText,
-                                                                     IonType.STRING)
-                                   and update_record_and_verify_type(transaction_executor, [ion_struct], IonPyDict,
-                                                                     IonType.STRUCT)
-                                   and update_record_and_verify_type(transaction_executor, [ion_symbol], IonPySymbol,
-                                                                     IonType.SYMBOL)
-                                   and update_record_and_verify_type(transaction_executor, [ion_timestamp],
-                                                                     IonPyTimestamp, IonType.TIMESTAMP)
-                                   and update_record_and_verify_type(transaction_executor, [ion_null_clob], IonPyNull,
-                                                                     IonType.CLOB)
-                                   and update_record_and_verify_type(transaction_executor, [ion_null_blob], IonPyNull,
-                                                                     IonType.BLOB)
-                                   and update_record_and_verify_type(transaction_executor, [ion_null_bool], IonPyNull,
-                                                                     IonType.BOOL)
-                                   and update_record_and_verify_type(transaction_executor, [ion_null_decimal],
-                                                                     IonPyNull, IonType.DECIMAL)
-                                   and update_record_and_verify_type(transaction_executor, [ion_null_float], IonPyNull,
-                                                                     IonType.FLOAT)
-                                   and update_record_and_verify_type(transaction_executor, [ion_null_int], IonPyNull,
-                                                                     IonType.INT)
-                                   and update_record_and_verify_type(transaction_executor, [ion_null_list], IonPyNull,
-                                                                     IonType.LIST)
-                                   and update_record_and_verify_type(transaction_executor, [ion_null_sexp], IonPyNull,
-                                                                     IonType.SEXP)
-                                   and update_record_and_verify_type(transaction_executor, [ion_null_string], IonPyNull,
-                                                                     IonType.STRING)
-                                   and update_record_and_verify_type(transaction_executor, [ion_null_struct], IonPyNull,
-                                                                     IonType.STRUCT)
-                                   and update_record_and_verify_type(transaction_executor, [ion_null_symbol], IonPyNull,
-                                                                     IonType.SYMBOL)
-                                   and update_record_and_verify_type(transaction_executor, [ion_null_timestamp],
-                                                                     IonPyNull, IonType.TIMESTAMP)
-                                   and delete_table(transaction_executor, TABLE_NAME),
-                                   lambda retry_attempt: logger.info('Retrying due to OCC conflict...'))
+            insert_and_verify_ion_types(session)
     except Exception:
         logger.exception('Error updating and validating Ion types.')

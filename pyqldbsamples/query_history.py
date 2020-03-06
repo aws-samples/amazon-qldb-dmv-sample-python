@@ -45,7 +45,7 @@ def previous_primary_owners(transaction_executor, vin):
     Find previous primary owners for the given VIN in a single transaction.
     In this example, query the `VehicleRegistration` history table to find all previous primary owners for a VIN.
 
-    :type transaction_executor: :py:class:`pyqldb.session.executor.Executor`
+    :type transaction_executor: :py:class:`pyqldb.execution.executor.Executor`
     :param transaction_executor: An Executor object allowing for execution of statements within a transaction.
 
     :type vin: str
@@ -61,7 +61,7 @@ def previous_primary_owners(transaction_executor, vin):
 
     for ids in person_ids:
         logger.info("Querying the 'VehicleRegistration' table's history using VIN: {}.".format(vin))
-        cursor = transaction_executor.execute_statement(query, [ids])
+        cursor = transaction_executor.execute_statement(query, ids)
         if not (print_result(cursor)) > 0:
             logger.info('No modification history found within the given time frame for document ID: {}'.format(ids))
 

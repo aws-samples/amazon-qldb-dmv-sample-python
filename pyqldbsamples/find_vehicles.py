@@ -30,7 +30,7 @@ def find_vehicles_for_owner(transaction_executor, gov_id):
     """
     Find vehicles registered under a driver using their government ID.
 
-    :type transaction_executor: :py:class:`pyqldb.session.executor.Executor`
+    :type transaction_executor: :py:class:`pyqldb.execution.executor.Executor`
     :param transaction_executor: An Executor object allowing for execution of statements within a transaction.
 
     :type gov_id: str
@@ -42,7 +42,7 @@ def find_vehicles_for_owner(transaction_executor, gov_id):
             "ON Vehicle.VIN = r.VIN WHERE r.Owners.PrimaryOwner.PersonId = ?"
 
     for ids in document_ids:
-        cursor = transaction_executor.execute_statement(query, [ids])
+        cursor = transaction_executor.execute_statement(query, ids)
         logger.info('List of Vehicles for owner with GovId: {}...'.format(gov_id))
         print_result(cursor)
 

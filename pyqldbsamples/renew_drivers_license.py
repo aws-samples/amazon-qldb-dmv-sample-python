@@ -33,7 +33,7 @@ def verify_driver_from_license_number(transaction_executor, license_number):
     """
     Verify whether a driver exists in the system with the provided license number.
 
-    :type transaction_executor: :py:class:`pyqldb.session.executor.Executor`
+    :type transaction_executor: :py:class:`pyqldb.execution.executor.Executor`
     :param transaction_executor: An Executor object allowing for execution of statements within a transaction.
 
     :type license_number: str
@@ -46,11 +46,10 @@ def verify_driver_from_license_number(transaction_executor, license_number):
     """
     logger.info("Finding person ID with license number: {}.".format(license_number))
     query = 'SELECT PersonId FROM DriversLicense AS d WHERE d.LicenseNumber = ?'
-    parameters = [convert_object_to_ion(license_number)]
-    person_id = transaction_executor.execute_statement(query, parameters)
+    person_id = transaction_executor.execute_statement(query, convert_object_to_ion(license_number))
     pid = next(person_id).get('PersonId')
     query = 'SELECT p.* FROM Person AS p BY pid WHERE pid = ?'
-    cursor = transaction_executor.execute_statement(query, [pid])
+    cursor = transaction_executor.execute_statement(query, pid)
     try:
         return next(cursor)
     except StopIteration:
@@ -61,7 +60,7 @@ def renew_drivers_license(transaction_executor, valid_from, valid_to, license_nu
     """
     Renew the ValidFromDate and ValidToDate of a driver's license.
 
-    :type transaction_executor: :py:class:`pyqldb.session.executor.Executor`
+    :type transaction_executor: :py:class:`pyqldb.execution.executor.Executor`
     :param transaction_executor: An Executor object allowing for execution of statements within a transaction.
 
     :type valid_from: :py:class:`datetime.datetime`
@@ -78,9 +77,11 @@ def renew_drivers_license(transaction_executor, valid_from, valid_to, license_nu
     logger.info('Renewing license with license number: {}...'.format(license_number))
     update_valid_date = 'UPDATE DriversLicense AS d SET d.ValidFromDate = ?, d.ValidToDate = ? WHERE d.LicenseNumber ' \
                         '= ?'
-    parameters = [convert_object_to_ion(valid_from), convert_object_to_ion(valid_to),
-                  convert_object_to_ion(license_number)]
-    cursor = transaction_executor.execute_statement(update_valid_date, parameters)
+    cursor = transaction_executor.execute_statement(
+        update_valid_date,
+        convert_object_to_ion(valid_from),
+        convert_object_to_ion(valid_to),
+        convert_object_to_ion(license_number))
     logger.info('DriversLicense Document IDs which had licenses renewed: ')
     list_of_licenses = get_document_ids_from_dml_results(cursor)
     for license in list_of_licenses:
@@ -92,7 +93,7 @@ def verify_and_renew_license(transaction_executor, license_num, valid_from_date,
     """
     Verify if the driver of the given license and update the license with the given dates in a single transaction.
 
-    :type transaction_executor: :py:class:`pyqldb.session.executor.Executor`
+    :type transaction_executor: :py:class:`pyqldb.execution.executor.Executor`
     :param transaction_executor: An Executor object allowing for execution of statements within a transaction.
 
     :type license_num: str

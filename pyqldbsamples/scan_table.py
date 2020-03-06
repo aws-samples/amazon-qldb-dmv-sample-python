@@ -29,7 +29,7 @@ def scan_table(transaction_executor, table_name):
     """
     Scan for all the documents in a table.
 
-    :type transaction_executor: :py:class:`pyqldb.session.executor.Executor`
+    :type transaction_executor: :py:class:`pyqldb.execution.executor.Executor`
     :param transaction_executor: An Executor object allowing for execution of statements within a transaction.
 
     :type table_name: str
@@ -52,8 +52,9 @@ if __name__ == '__main__':
             # Scan all the tables and print their documents.
             tables = session.list_tables()
             for table in tables:
-                cursor = session.execute_lambda(lambda executor: scan_table(executor, table),
-                                                lambda retry_attempt: logger.info('Retrying due to OCC conflict...'))
+                cursor = session.execute_lambda(
+                    lambda executor: scan_table(executor, table),
+                    retry_indicator=lambda retry_attempt: logger.info('Retrying due to OCC conflict...'))
                 logger.info('Scan successful!')
                 print_result(cursor)
     except Exception:

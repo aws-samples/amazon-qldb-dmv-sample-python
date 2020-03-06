@@ -31,7 +31,7 @@ def find_person_from_document_id(transaction_executor, document_id):
     """
     Query a driver's information using the given ID.
 
-    :type transaction_executor: :py:class:`pyqldb.session.executor.Executor`
+    :type transaction_executor: :py:class:`pyqldb.execution.executor.Executor`
     :param transaction_executor: An Executor object allowing for execution of statements within a transaction.
 
     :type document_id: :py:class:`amazon.ion.simple_types.IonPyText`
@@ -41,7 +41,7 @@ def find_person_from_document_id(transaction_executor, document_id):
     :return: The resulting document from the query.
     """
     query = 'SELECT p.* FROM Person AS p BY pid WHERE pid = ?'
-    cursor = transaction_executor.execute_statement(query, [document_id])
+    cursor = transaction_executor.execute_statement(query, document_id)
     return next(cursor)
 
 
@@ -49,7 +49,7 @@ def find_primary_owner_for_vehicle(transaction_executor, vin):
     """
     Find the primary owner of a vehicle given its VIN.
 
-    :type transaction_executor: :py:class:`pyqldb.session.executor.Executor`
+    :type transaction_executor: :py:class:`pyqldb.execution.executor.Executor`
     :param transaction_executor: An Executor object allowing for execution of statements within a transaction.
 
     :type vin: str
@@ -60,8 +60,7 @@ def find_primary_owner_for_vehicle(transaction_executor, vin):
     """
     logger.info('Finding primary owner for vehicle with VIN: {}.'.format(vin))
     query = "SELECT Owners.PrimaryOwner.PersonId FROM VehicleRegistration AS v WHERE v.VIN = ?"
-    parameters = [convert_object_to_ion(vin)]
-    cursor = transaction_executor.execute_statement(query, parameters)
+    cursor = transaction_executor.execute_statement(query, convert_object_to_ion(vin))
     try:
         return find_person_from_document_id(transaction_executor, next(cursor).get('PersonId'))
     except StopIteration:
@@ -73,7 +72,7 @@ def update_vehicle_registration(transaction_executor, vin, document_id):
     """
     Update the primary owner for a vehicle using the given VIN.
 
-    :type transaction_executor: :py:class:`pyqldb.session.executor.Executor`
+    :type transaction_executor: :py:class:`pyqldb.execution.executor.Executor`
     :param transaction_executor: An Executor object allowing for execution of statements within a transaction.
 
     :type vin: str
@@ -86,8 +85,7 @@ def update_vehicle_registration(transaction_executor, vin, document_id):
     """
     logger.info('Updating the primary owner for vehicle with Vin: {}...'.format(vin))
     statement = "UPDATE VehicleRegistration AS r SET r.Owners.PrimaryOwner.PersonId = ? WHERE r.VIN = ?"
-    parameters = [document_id, convert_object_to_ion(vin)]
-    cursor = transaction_executor.execute_statement(statement, parameters)
+    cursor = transaction_executor.execute_statement(statement, document_id, convert_object_to_ion(vin))
     try:
         print_result(cursor)
         logger.info('Successfully transferred vehicle with VIN: {} to new owner.'.format(vin))
@@ -99,7 +97,7 @@ def validate_and_update_registration(transaction_executor, vin, current_owner, n
     """
     Validate the current owner of the given vehicle and transfer its ownership to a new owner in a single transaction.
 
-    :type transaction_executor: :py:class:`pyqldb.session.executor.Executor`
+    :type transaction_executor: :py:class:`pyqldb.execution.executor.Executor`
     :param transaction_executor: An Executor object allowing for execution of statements within a transaction.
 
     :type vin: str
@@ -135,6 +133,6 @@ if __name__ == '__main__':
         with create_qldb_session() as session:
             session.execute_lambda(lambda executor: validate_and_update_registration(executor, vehicle_vin,
                                                                                      previous_owner, new_owner),
-                                   lambda retry_attempt: logger.info('Retrying due to OCC conflict...'))
+                                   retry_indicator=lambda retry_attempt: logger.info('Retrying due to OCC conflict...'))
     except Exception:
         logger.exception('Error updating VehicleRegistration.')

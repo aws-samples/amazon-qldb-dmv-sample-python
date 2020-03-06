@@ -29,7 +29,7 @@ def create_table(transaction_executor, table_name):
     """
     Create a table with the specified name using an Executor object.
 
-    :type transaction_executor: :py:class:`pyqldb.session.executor.Executor`
+    :type transaction_executor: :py:class:`pyqldb.execution.executor.Executor`
     :param transaction_executor: An Executor object allowing for execution of statements within a transaction.
 
     :type table_name: str
