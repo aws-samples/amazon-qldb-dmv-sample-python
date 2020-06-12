@@ -21,7 +21,7 @@ from logging import basicConfig, getLogger, INFO
 from pyqldbsamples.add_secondary_owner import get_document_ids, print_result, SampleData
 from pyqldbsamples.constants import Constants
 from pyqldbsamples.model.sample_data import convert_object_to_ion
-from pyqldbsamples.connect_to_ledger import create_qldb_session
+from pyqldbsamples.connect_to_ledger import create_qldb_driver
 
 logger = getLogger(__name__)
 basicConfig(level=INFO)
@@ -130,9 +130,8 @@ if __name__ == '__main__':
     new_owner = SampleData.PERSON[1]['GovId']
 
     try:
-        with create_qldb_session() as session:
-            session.execute_lambda(lambda executor: validate_and_update_registration(executor, vehicle_vin,
-                                                                                     previous_owner, new_owner),
-                                   retry_indicator=lambda retry_attempt: logger.info('Retrying due to OCC conflict...'))
+        with create_qldb_driver() as driver:
+            driver.execute_lambda(lambda executor: validate_and_update_registration(executor, vehicle_vin,
+                                                                                     previous_owner, new_owner))
     except Exception:
         logger.exception('Error updating VehicleRegistration.')

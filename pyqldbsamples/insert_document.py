@@ -20,7 +20,7 @@ from logging import basicConfig, getLogger, INFO
 
 from pyqldbsamples.constants import Constants
 from pyqldbsamples.model.sample_data import convert_object_to_ion, SampleData, get_document_ids_from_dml_results
-from pyqldbsamples.connect_to_ledger import create_qldb_session
+from pyqldbsamples.connect_to_ledger import create_qldb_driver
 
 logger = getLogger(__name__)
 basicConfig(level=INFO)
@@ -92,10 +92,10 @@ if __name__ == '__main__':
     Insert documents into a table in a QLDB ledger.
     """
     try:
-        with create_qldb_session() as session:
+        with create_qldb_driver() as driver:
             # An INSERT statement creates the initial revision of a document with a version number of zero.
             # QLDB also assigns a unique document identifier in GUID format as part of the metadata.
-            session.execute_lambda(lambda executor: update_and_insert_documents(executor),
+            driver.execute_lambda(lambda executor: update_and_insert_documents(executor),
                                    lambda retry_attempt: logger.info('Retrying due to OCC conflict...'))
             logger.info('Documents inserted successfully!')
     except Exception:

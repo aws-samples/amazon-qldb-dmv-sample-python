@@ -18,7 +18,7 @@
 # https://boto3.amazonaws.com/v1/documentation/api/latest/guide/quickstart.html
 from logging import basicConfig, getLogger, INFO
 
-from pyqldbsamples.connect_to_ledger import create_qldb_session
+from pyqldbsamples.connect_to_ledger import create_qldb_driver
 from pyqldbsamples.model.sample_data import SampleData, convert_object_to_ion
 
 logger = getLogger(__name__)
@@ -55,8 +55,8 @@ if __name__ == '__main__':
     license_number = SampleData.DRIVERS_LICENSE[1]['LicenseNumber']
 
     try:
-        with create_qldb_session() as session:
-            session.execute_lambda(lambda executor: deregister_drivers_license(executor, license_number),
+        with create_qldb_driver() as driver:
+            driver.execute_lambda(lambda executor: deregister_drivers_license(executor, license_number),
                                    lambda retry_attempt: logger.info('Retrying due to OCC conflict...'))
     except Exception:
         logger.exception('Error deleting driver license.')

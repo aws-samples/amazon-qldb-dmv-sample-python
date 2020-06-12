@@ -19,7 +19,7 @@
 from logging import basicConfig, getLogger, INFO
 
 from pyqldbsamples.constants import Constants
-from pyqldbsamples.connect_to_ledger import create_qldb_session
+from pyqldbsamples.connect_to_ledger import create_qldb_driver
 
 logger = getLogger(__name__)
 basicConfig(level=INFO)
@@ -50,8 +50,8 @@ if __name__ == '__main__':
     Create registrations, vehicles, owners, and licenses tables in a single transaction.
     """
     try:
-        with create_qldb_session() as session:
-            session.execute_lambda(lambda x: create_table(x, Constants.DRIVERS_LICENSE_TABLE_NAME) and
+        with create_qldb_driver() as qldb_driver:
+            qldb_driver.execute_lambda(lambda x: create_table(x, Constants.DRIVERS_LICENSE_TABLE_NAME) and
                                    create_table(x, Constants.PERSON_TABLE_NAME) and
                                    create_table(x, Constants.VEHICLE_TABLE_NAME) and
                                    create_table(x, Constants.VEHICLE_REGISTRATION_TABLE_NAME),

@@ -20,7 +20,7 @@ from logging import basicConfig, getLogger, INFO
 from datetime import datetime
 
 from pyqldbsamples.model.sample_data import SampleData, convert_object_to_ion, get_document_ids_from_dml_results
-from pyqldbsamples.connect_to_ledger import create_qldb_session
+from pyqldbsamples.connect_to_ledger import create_qldb_driver
 
 logger = getLogger(__name__)
 basicConfig(level=INFO)
@@ -115,9 +115,9 @@ if __name__ == '__main__':
     Renew a driver's license.
     """
     try:
-        with create_qldb_session() as session:
+        with create_qldb_driver() as driver:
             license_number = SampleData.DRIVERS_LICENSE[0]['LicenseNumber']
-            session.execute_lambda(lambda executor: verify_and_renew_license(executor, license_number,
+            driver.execute_lambda(lambda executor: verify_and_renew_license(executor, license_number,
                                                                              VALID_FROM_DATE, VALID_TO_DATE),
                                    lambda retry_attempt: logger.info('Retrying due to OCC conflict...'))
     except Exception:

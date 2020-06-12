@@ -19,7 +19,7 @@
 from logging import basicConfig, getLogger, INFO
 
 from pyqldbsamples.model.sample_data import print_result
-from pyqldbsamples.connect_to_ledger import create_qldb_session
+from pyqldbsamples.connect_to_ledger import create_qldb_driver
 
 logger = getLogger(__name__)
 basicConfig(level=INFO)
@@ -48,13 +48,12 @@ if __name__ == '__main__':
     Scan for all the documents in a table.
     """
     try:
-        with create_qldb_session() as session:
+        with create_qldb_driver() as driver:
             # Scan all the tables and print their documents.
-            tables = session.list_tables()
+            tables = driver.list_tables()
             for table in tables:
-                cursor = session.execute_lambda(
-                    lambda executor: scan_table(executor, table),
-                    retry_indicator=lambda retry_attempt: logger.info('Retrying due to OCC conflict...'))
+                cursor = driver.execute_lambda(
+                    lambda executor: scan_table(executor, table))
                 logger.info('Scan successful!')
                 print_result(cursor)
     except Exception:

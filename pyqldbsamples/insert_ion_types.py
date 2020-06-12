@@ -29,7 +29,7 @@ from amazon.ion.core import IonType
 from pyqldbsamples.create_table import create_table
 from pyqldbsamples.insert_document import insert_documents
 from pyqldbsamples.model.sample_data import convert_object_to_ion
-from pyqldbsamples.connect_to_ledger import create_qldb_session
+from pyqldbsamples.connect_to_ledger import create_qldb_driver
 
 logger = getLogger(__name__)
 basicConfig(level=INFO)
@@ -95,13 +95,13 @@ def delete_table(transaction_executor, table_name):
     return len(list(cursor))
 
 
-def insert_and_verify_ion_types(session):
+def insert_and_verify_ion_types(driver):
     """
     Insert all the supported Ion types and Python values that are convertible to Ion into a ledger and verify that they
     are stored and can be retrieved properly, retaining their original properties.
 
-    :type session: :py:class:`pyqldb.session.base_qldb_session.BaseQldbSession`
-    :param session: A QLDB session object.
+    :type driver: :py:class:`pyqldb.driver.qldb_driver.QldbDriver`
+    :param driver: A QLDB Driver object.
     """
     python_bytes = str.encode('hello')
     python_bool = True
@@ -141,7 +141,7 @@ def insert_and_verify_ion_types(session):
     ion_null_symbol = convert_object_to_ion(loads('null.symbol'))
     ion_null_timestamp = convert_object_to_ion(loads('null.timestamp'))
 
-    session.execute_lambda(lambda transaction_executor: create_table(transaction_executor, TABLE_NAME)
+    driver.execute_lambda(lambda transaction_executor: create_table(transaction_executor, TABLE_NAME)
                            and insert_documents(transaction_executor, TABLE_NAME, [{'Name': 'val'}])
                            and update_record_and_verify_type(transaction_executor, python_bytes, IonPyBytes,
                                                              IonType.BLOB)
@@ -223,7 +223,7 @@ if __name__ == '__main__':
     are stored and can be retrieved properly, retaining their original properties.
     """
     try:
-        with create_qldb_session() as session:
-            insert_and_verify_ion_types(session)
+        with create_qldb_driver() as driver:
+            insert_and_verify_ion_types(driver)
     except Exception:
         logger.exception('Error updating and validating Ion types.')

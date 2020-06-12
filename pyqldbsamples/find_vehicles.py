@@ -20,7 +20,7 @@ from logging import basicConfig, getLogger, INFO
 
 from pyqldbsamples.model.sample_data import get_document_ids, print_result, SampleData
 from pyqldbsamples.constants import Constants
-from pyqldbsamples.connect_to_ledger import create_qldb_session
+from pyqldbsamples.connect_to_ledger import create_qldb_driver
 
 logger = getLogger(__name__)
 basicConfig(level=INFO)
@@ -52,10 +52,10 @@ if __name__ == '__main__':
     Find all vehicles registered under a person.
     """
     try:
-        with create_qldb_session() as session:
+        with create_qldb_driver() as driver:
             # Find all vehicles registered under a person.
             gov_id = SampleData.PERSON[0]['GovId']
-            session.execute_lambda(lambda executor: find_vehicles_for_owner(executor, gov_id),
+            driver.execute_lambda(lambda executor: find_vehicles_for_owner(executor, gov_id),
                                    lambda retry_attempt: logger.info('Retrying due to OCC conflict...'))
     except Exception:
         logger.exception('Error getting vehicles for owner.')

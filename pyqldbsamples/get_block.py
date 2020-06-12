@@ -26,7 +26,7 @@ from pyqldbsamples.get_revision import lookup_registration_for_vin
 from pyqldbsamples.get_digest import get_digest_result
 from pyqldbsamples.verifier import to_base_64, verify_document, parse_block, flip_random_bit
 from pyqldbsamples.qldb.block_address import block_address_to_dictionary
-from pyqldbsamples.connect_to_ledger import create_qldb_session
+from pyqldbsamples.connect_to_ledger import create_qldb_driver
 from pyqldbsamples.qldb.qldb_string_utils import block_response_to_string, value_holder_to_string
 
 logger = getLogger(__name__)
@@ -147,9 +147,8 @@ if __name__ == '__main__':
     """
     vin = SampleData.VEHICLE_REGISTRATION[1]['VIN']
     try:
-        with create_qldb_session() as session:
-            cursor = session.execute_lambda(lambda executor: lookup_registration_for_vin(executor, vin),
-                                            lambda retry_indicator: logger.info('Retrying due to OCC conflict...'))
+        with create_qldb_driver() as driver:
+            cursor = driver.execute_lambda(lambda executor: lookup_registration_for_vin(executor, vin))
             row = next(cursor)
             block_address = row.get('blockAddress')
             verify_block(Constants.LEDGER_NAME, block_address)
