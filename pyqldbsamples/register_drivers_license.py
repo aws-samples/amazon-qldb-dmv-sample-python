@@ -22,7 +22,7 @@ from datetime import datetime
 from pyqldbsamples.model.sample_data import convert_object_to_ion, get_document_ids
 from pyqldbsamples.constants import Constants
 from pyqldbsamples.insert_document import insert_documents
-from pyqldbsamples.connect_to_ledger import create_qldb_session
+from pyqldbsamples.connect_to_ledger import create_qldb_driver
 
 logger = getLogger(__name__)
 basicConfig(level=INFO)
@@ -148,7 +148,7 @@ if __name__ == '__main__':
     Register a new driver's license.
     """
     try:
-        with create_qldb_session() as session:
+        with create_qldb_driver() as driver:
             new_driver = {
                 'FirstName': 'Kate',
                 'LastName': 'Mulberry',
@@ -164,7 +164,6 @@ if __name__ == '__main__':
                 'ValidFromDate': datetime(2018, 6, 30),
                 'ValidToDate': datetime(2022, 10, 30)
             }
-            session.execute_lambda(lambda executor: register_new_drivers_license(executor, new_driver, drivers_license),
-                                   retry_indicator=lambda retry_attempt: logger.info('Retrying due to OCC conflict...'))
+            driver.execute_lambda(lambda executor: register_new_drivers_license(executor, new_driver, drivers_license))
     except Exception:
         logger.exception('Error registering new driver.')

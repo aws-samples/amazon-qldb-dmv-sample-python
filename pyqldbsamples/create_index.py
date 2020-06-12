@@ -19,7 +19,7 @@
 from logging import basicConfig, getLogger, INFO
 
 from pyqldbsamples.constants import Constants
-from pyqldbsamples.connect_to_ledger import create_qldb_session
+from pyqldbsamples.connect_to_ledger import create_qldb_driver
 
 logger = getLogger(__name__)
 basicConfig(level=INFO)
@@ -53,8 +53,8 @@ if __name__ == '__main__':
     """
     logger.info('Creating indexes on all tables in a single transaction...')
     try:
-        with create_qldb_session() as session:
-            session.execute_lambda(lambda x: create_index(x, Constants.PERSON_TABLE_NAME,
+        with create_qldb_driver() as driver:
+            driver.execute_lambda(lambda x: create_index(x, Constants.PERSON_TABLE_NAME,
                                                           Constants.GOV_ID_INDEX_NAME)
                                    and create_index(x, Constants.VEHICLE_TABLE_NAME,
                                                     Constants.VEHICLE_VIN_INDEX_NAME)

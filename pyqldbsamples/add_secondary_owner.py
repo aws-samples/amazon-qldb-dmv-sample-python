@@ -21,7 +21,7 @@ from logging import basicConfig, getLogger, INFO
 from pyqldbsamples.model.sample_data import to_ion_struct, get_document_ids, print_result, SampleData, \
     convert_object_to_ion
 from pyqldbsamples.constants import Constants
-from pyqldbsamples.connect_to_ledger import create_qldb_session
+from pyqldbsamples.connect_to_ledger import create_qldb_driver
 
 logger = getLogger(__name__)
 basicConfig(level=INFO)
@@ -125,8 +125,8 @@ if __name__ == '__main__':
     vin = SampleData.VEHICLE[1]['VIN']
     gov_id = SampleData.PERSON[0]['GovId']
     try:
-        with create_qldb_session() as session:
-            session.execute_lambda(lambda executor: register_secondary_owner(executor, vin, gov_id),
+        with create_qldb_driver() as driver:
+            driver.execute_lambda(lambda executor: register_secondary_owner(executor, vin, gov_id),
                                    lambda retry_attempt: logger.info('Retrying due to OCC conflict...'))
             logger.info('Secondary owners successfully updated.')
     except Exception:

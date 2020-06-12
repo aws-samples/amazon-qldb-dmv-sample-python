@@ -26,7 +26,7 @@ from pyqldbsamples.get_digest import get_digest_result
 from pyqldbsamples.model.sample_data import SampleData, convert_object_to_ion
 from pyqldbsamples.qldb.block_address import block_address_to_dictionary
 from pyqldbsamples.verifier import verify_document, flip_random_bit, to_base_64
-from pyqldbsamples.connect_to_ledger import create_qldb_session
+from pyqldbsamples.connect_to_ledger import create_qldb_driver
 from pyqldbsamples.qldb.qldb_string_utils import value_holder_to_string
 
 logger = getLogger(__name__)
@@ -59,12 +59,12 @@ def get_revision(ledger_name, document_id, block_address, digest_tip_address):
     return result
 
 
-def lookup_registration_for_vin(qldb_session, vin):
+def lookup_registration_for_vin(driver, vin):
     """
     Query revision history for a particular vehicle for verification.
 
-    :type qldb_session: :py:class:`pyqldb.session.qldb_session.QldbSession`
-    :param qldb_session: An instance of the QldbSession class.
+    :type driver: :py:class:`pyqldb.driver.qldb_driver.QldbDriver`
+    :param driver: An instance of the QldbDriver class.
 
     :type vin: str
     :param vin: VIN to query the revision history of a specific registration with.
@@ -75,16 +75,16 @@ def lookup_registration_for_vin(qldb_session, vin):
     logger.info("Querying the 'VehicleRegistration' table for VIN: {}...".format(vin))
     query = 'SELECT * FROM _ql_committed_VehicleRegistration WHERE data.VIN = ?'
     parameters = [convert_object_to_ion(vin)]
-    cursor = qldb_session.execute_statement(query, parameters)
+    cursor = driver.execute_lambda( lambda txn: txn.execute_statement(query, parameters))
     return cursor
 
 
-def verify_registration(qldb_session, ledger_name, vin):
+def verify_registration(driver, ledger_name, vin):
     """
     Verify each version of the registration for the given VIN.
 
-    :type qldb_session: :py:class:`pyqldb.session.qldb_session.QldbSession`
-    :param qldb_session: An instance of the QldbSession class.
+    :type driver: :py:class:`pyqldb.driver.qldb_driver.QldbDriver`
+    :param driver: An instance of the QldbDriver class.
 
     :type ledger_name: str
     :param ledger_name: The ledger to get digest from.
@@ -103,7 +103,7 @@ def verify_registration(qldb_session, ledger_name, vin):
         value_holder_to_string(digest_tip_address.get('IonText')), to_base_64(digest_bytes)))
 
     logger.info('Querying the registration with VIN = {} to verify each version of the registration...'.format(vin))
-    cursor = lookup_registration_for_vin(qldb_session, vin)
+    cursor = lookup_registration_for_vin(driver, vin)
     logger.info('Getting a proof for the document.')
 
     for row in cursor:
@@ -142,7 +142,7 @@ if __name__ == '__main__':
     registration = SampleData.VEHICLE_REGISTRATION[0]
     vin = registration['VIN']
     try:
-        with create_qldb_session() as session:
-            verify_registration(session, Constants.LEDGER_NAME, vin)
+        with create_qldb_driver() as driver:
+            verify_registration(driver, Constants.LEDGER_NAME, vin)
     except Exception:
         logger.exception('Unable to verify revision.')

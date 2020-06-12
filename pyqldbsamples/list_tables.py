@@ -18,7 +18,7 @@
 # https://boto3.amazonaws.com/v1/documentation/api/latest/guide/quickstart.html
 from logging import basicConfig, getLogger, INFO
 
-from pyqldbsamples.connect_to_ledger import create_qldb_session
+from pyqldbsamples.connect_to_ledger import create_qldb_driver
 
 logger = getLogger(__name__)
 basicConfig(level=INFO)
@@ -29,12 +29,12 @@ def list_tables():
     List all tables.
 
     :rtype: list
-    :return: List of ledgers.
+    :return: List of tables.
     """
     logger.info("Let's list all the tables...")
-    with create_qldb_session() as session:
+    with create_qldb_driver() as driver:
         logger.info("Success. List of tables:")
-        tables = session.list_tables()
+        tables = driver.list_tables()
         for table in tables:
             logger.info(table)
     return tables

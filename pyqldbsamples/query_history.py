@@ -21,7 +21,7 @@ from logging import basicConfig, getLogger, INFO
 
 from pyqldbsamples.model.sample_data import print_result, get_document_ids, SampleData
 from pyqldbsamples.constants import Constants
-from pyqldbsamples.connect_to_ledger import create_qldb_session
+from pyqldbsamples.connect_to_ledger import create_qldb_driver
 
 logger = getLogger(__name__)
 basicConfig(level=INFO)
@@ -71,9 +71,9 @@ if __name__ == '__main__':
     Query a table's history for a particular set of documents.
     """
     try:
-        with create_qldb_session() as session:
+        with create_qldb_driver() as driver:
             vin = SampleData.VEHICLE_REGISTRATION[0]['VIN']
-            session.execute_lambda(lambda lambda_executor: previous_primary_owners(lambda_executor, vin),
+            driver.execute_lambda(lambda lambda_executor: previous_primary_owners(lambda_executor, vin),
                                    lambda retry_attempt: logger.info('Retrying due to OCC conflict...'))
             logger.info('Successfully queried history.')
     except Exception:

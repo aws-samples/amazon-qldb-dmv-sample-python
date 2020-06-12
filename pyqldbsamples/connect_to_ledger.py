@@ -20,7 +20,7 @@ from logging import basicConfig, getLogger, INFO
 
 from botocore.exceptions import ClientError
 
-from pyqldb.driver.pooled_qldb_driver import PooledQldbDriver
+from pyqldb.driver.qldb_driver import QldbDriver
 from pyqldbsamples.constants import Constants
 
 logger = getLogger(__name__)
@@ -29,7 +29,7 @@ basicConfig(level=INFO)
 
 def create_qldb_driver(ledger_name=Constants.LEDGER_NAME, region_name=None, endpoint_url=None, boto3_session=None):
     """
-    Create a QLDB driver for creating sessions.
+    Create a QLDB driver for executing transactions.
 
     :type ledger_name: str
     :param ledger_name: The QLDB ledger name.
@@ -43,38 +43,24 @@ def create_qldb_driver(ledger_name=Constants.LEDGER_NAME, region_name=None, endp
     :type boto3_session: :py:class:`boto3.session.Session`
     :param boto3_session: The boto3 session to create the client with (see [1]).
 
-    :rtype: :py:class:`pyqldb.driver.pooled_qldb_driver.PooledQldbDriver`
-    :return: A pooled QLDB driver object.
+    :rtype: :py:class:`pyqldb.driver.qldb_driver.QldbDriver`
+    :return: A QLDB driver object.
 
     [1]: `Boto3 Session.client Reference <https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html#boto3.session.Session.client>`.
     """
-    qldb_driver = PooledQldbDriver(ledger_name=ledger_name, region_name=region_name, endpoint_url=endpoint_url,
-                                   boto3_session=boto3_session)
+    qldb_driver = QldbDriver(ledger_name=ledger_name, region_name=region_name, endpoint_url=endpoint_url,
+                             boto3_session=boto3_session)
     return qldb_driver
-
-
-def create_qldb_session():
-    """
-    Retrieve a QLDB session object.
-
-    :rtype: :py:class:`pyqldb.session.pooled_qldb_session.PooledQldbSession`
-    :return: A pooled QLDB session object.
-    """
-    qldb_session = pooled_qldb_driver.get_session()
-    return qldb_session
-
-
-pooled_qldb_driver = create_qldb_driver()
 
 
 if __name__ == '__main__':
     """
-    Connect to a session for a given ledger using default settings.
+    Connect to a given ledger using default settings.
     """
     try:
-        qldb_session = create_qldb_session()
-        logger.info('Listing table names ')
-        for table in qldb_session.list_tables():
-            logger.info(table)
+        with create_qldb_driver() as driver:
+            logger.info('Listing table names ')
+            for table in driver.list_tables():
+                logger.info(table)
     except ClientError:
-        logger.exception('Unable to create session.')
+        logger.exception('Unable to list tables.')
