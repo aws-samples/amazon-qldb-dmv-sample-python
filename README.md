@@ -10,11 +10,15 @@ For our tutorial, see [Python and Amazon QLDB](https://docs.aws.amazon.com/qldb/
 
 See [Accessing Amazon QLDB](https://docs.aws.amazon.com/qldb/latest/developerguide/accessing.html) for information on connecting to AWS.
 
-### Python 3.x
+### Required Python versions
 
-The examples require Python 3.x. Please see the link below for more detail to install Python 3.x:
+DMV Sample App v1.x requires Python 3.4 or later.
 
-* [Python 3.x Installation](https://www.python.org/downloads/)
+DMV Sample App v2.x requires Python 3.6 or later. 
+
+Please see the link below for more detail to install Python:
+
+* [Python Installation](https://www.python.org/downloads/)
 
 ## Installing the driver and dependencies
 
