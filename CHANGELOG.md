@@ -1,3 +1,6 @@
+### Release 2.0.0
+* Upgrade Sample App version from 2.0.0-rc.1 to 2.0.0
+
 ### Release 2.0.0-rc.1
 * Upgraded Pyqldb version from 2.0.0 to 3.0.0-rc.1
 
@@ -14,3 +17,4 @@
 ### Release 1.0.0-rc.1
 
 * Initial preview release of the QLDB Python Sample Application.
+
