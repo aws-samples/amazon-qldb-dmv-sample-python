@@ -121,16 +121,16 @@ def get_journal_blocks(s3_object):
 
     :raises RuntimeError: If there is an error loading the journal.
     """
-    journals = loads(s3_object)
+    journals = loads(s3_object, single_value=False)
     journal_blocks = []
 
-    if isinstance(journals, list):
+    try:
         for journal in journals:
             parsed_journal = from_ion(journal)
             journal_blocks.append(parsed_journal)
-    else:
-        parsed_journal = from_ion(journals)
-        journal_blocks.append(parsed_journal)
+    except Exception:
+        logger.log("Invalid format to map to a JournalBlock!")
+        raise Exception
 
     logger.info('Found {} block(s).'.format(len(journal_blocks)))
     return journal_blocks
