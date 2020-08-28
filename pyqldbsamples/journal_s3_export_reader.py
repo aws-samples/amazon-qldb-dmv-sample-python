@@ -114,28 +114,24 @@ def get_journal_blocks(s3_object):
     Parse the given S3 object's content for the journal data objects in Ion format.
 
     :type s3_object: str
-    :param s3_object: The content within a S3 object.
+    :param s3_object: The content within a S3 object as an ion string.
 
     :rtype: list
     :return: List of journal blocks.
 
     :raises RuntimeError: If there is an error loading the journal.
     """
-    journals = s3_object.split('} {')
+    journals = loads(s3_object, single_value=False)
     journal_blocks = []
 
-    for i in range(len(journals)):
-        if i == 0:
-            journals[i] = journals[i] + "}"
-        elif i == len(journals)-1:
-            journals[i] = "{" + journals[i]
-        else:
-            journals[i] = "{" + journals[i] + "}"
-        try:
-            parsed_journal = from_ion(loads(journals[i]))
+    try:
+        for journal in journals:
+            parsed_journal = from_ion(journal)
             journal_blocks.append(parsed_journal)
-        except ValueError as ve:
-            raise RuntimeError('Failed to load journal: {}'.format(ve))
+    except Exception:
+        logger.log("Invalid format to map to a JournalBlock!")
+        raise Exception
+
     logger.info('Found {} block(s).'.format(len(journal_blocks)))
     return journal_blocks
 
