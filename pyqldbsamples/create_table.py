@@ -54,8 +54,7 @@ if __name__ == '__main__':
             qldb_driver.execute_lambda(lambda x: create_table(x, Constants.DRIVERS_LICENSE_TABLE_NAME) and
                                    create_table(x, Constants.PERSON_TABLE_NAME) and
                                    create_table(x, Constants.VEHICLE_TABLE_NAME) and
-                                   create_table(x, Constants.VEHICLE_REGISTRATION_TABLE_NAME),
-                                   lambda retry_attempt: logger.info('Retrying due to OCC conflict...'))
+                                   create_table(x, Constants.VEHICLE_REGISTRATION_TABLE_NAME))
             logger.info('Tables created successfully.')
     except Exception:
         logger.exception('Errors creating tables.')

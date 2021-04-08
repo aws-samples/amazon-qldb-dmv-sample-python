@@ -126,8 +126,7 @@ if __name__ == '__main__':
     gov_id = SampleData.PERSON[0]['GovId']
     try:
         with create_qldb_driver() as driver:
-            driver.execute_lambda(lambda executor: register_secondary_owner(executor, vin, gov_id),
-                                   lambda retry_attempt: logger.info('Retrying due to OCC conflict...'))
+            driver.execute_lambda(lambda executor: register_secondary_owner(executor, vin, gov_id))
             logger.info('Secondary owners successfully updated.')
     except Exception:
         logger.exception('Error adding secondary owner.')

@@ -148,7 +148,7 @@ if __name__ == '__main__':
     vin = SampleData.VEHICLE_REGISTRATION[1]['VIN']
     try:
         with create_qldb_driver() as driver:
-            cursor = driver.execute_lambda(lambda executor: lookup_registration_for_vin(executor, vin))
+            cursor = lookup_registration_for_vin(driver, vin)
             row = next(cursor)
             block_address = row.get('blockAddress')
             verify_block(Constants.LEDGER_NAME, block_address)

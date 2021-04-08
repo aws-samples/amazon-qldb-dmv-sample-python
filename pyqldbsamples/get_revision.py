@@ -74,8 +74,7 @@ def lookup_registration_for_vin(driver, vin):
     """
     logger.info("Querying the 'VehicleRegistration' table for VIN: {}...".format(vin))
     query = 'SELECT * FROM _ql_committed_VehicleRegistration WHERE data.VIN = ?'
-    parameters = [convert_object_to_ion(vin)]
-    cursor = driver.execute_lambda( lambda txn: txn.execute_statement(query, parameters))
+    cursor = driver.execute_lambda(lambda txn: txn.execute_statement(query, convert_object_to_ion(vin)))
     return cursor
 
 

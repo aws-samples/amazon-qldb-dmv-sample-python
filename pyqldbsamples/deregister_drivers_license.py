@@ -56,7 +56,6 @@ if __name__ == '__main__':
 
     try:
         with create_qldb_driver() as driver:
-            driver.execute_lambda(lambda executor: deregister_drivers_license(executor, license_number),
-                                   lambda retry_attempt: logger.info('Retrying due to OCC conflict...'))
+            driver.execute_lambda(lambda executor: deregister_drivers_license(executor, license_number))
     except Exception:
         logger.exception('Error deleting driver license.')

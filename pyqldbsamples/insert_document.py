@@ -95,8 +95,7 @@ if __name__ == '__main__':
         with create_qldb_driver() as driver:
             # An INSERT statement creates the initial revision of a document with a version number of zero.
             # QLDB also assigns a unique document identifier in GUID format as part of the metadata.
-            driver.execute_lambda(lambda executor: update_and_insert_documents(executor),
-                                   lambda retry_attempt: logger.info('Retrying due to OCC conflict...'))
+            driver.execute_lambda(lambda executor: update_and_insert_documents(executor))
             logger.info('Documents inserted successfully!')
     except Exception:
         logger.exception('Error inserting or updating documents.')

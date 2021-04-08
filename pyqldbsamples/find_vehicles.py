@@ -55,7 +55,6 @@ if __name__ == '__main__':
         with create_qldb_driver() as driver:
             # Find all vehicles registered under a person.
             gov_id = SampleData.PERSON[0]['GovId']
-            driver.execute_lambda(lambda executor: find_vehicles_for_owner(executor, gov_id),
-                                   lambda retry_attempt: logger.info('Retrying due to OCC conflict...'))
+            driver.execute_lambda(lambda executor: find_vehicles_for_owner(executor, gov_id))
     except Exception:
         logger.exception('Error getting vehicles for owner.')

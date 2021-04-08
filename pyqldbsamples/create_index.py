@@ -65,8 +65,7 @@ if __name__ == '__main__':
                                    and create_index(x, Constants.DRIVERS_LICENSE_TABLE_NAME,
                                                     Constants.PERSON_ID_INDEX_NAME)
                                    and create_index(x, Constants.DRIVERS_LICENSE_TABLE_NAME,
-                                                    Constants.LICENSE_NUMBER_INDEX_NAME),
-                                   lambda retry_attempt: logger.info('Retrying due to OCC conflict...'))
+                                                    Constants.LICENSE_NUMBER_INDEX_NAME))
             logger.info('Indexes created successfully.')
     except Exception:
         logger.exception('Unable to create indexes.')
