@@ -20,7 +20,6 @@ from logging import basicConfig, getLogger, INFO
 from amazon.ion.simple_types import IonPyBool, IonPyBytes, IonPyDecimal, IonPyDict, IonPyFloat, IonPyInt, IonPyList, \
     IonPyNull, IonPySymbol, IonPyText, IonPyTimestamp
 from amazon.ion.simpleion import dumps, loads
-from pyqldb.cursor.buffered_cursor import BufferedCursor
 
 logger = getLogger(__name__)
 basicConfig(level=INFO)
