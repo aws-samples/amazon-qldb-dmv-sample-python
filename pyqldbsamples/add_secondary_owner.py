@@ -27,12 +27,12 @@ logger = getLogger(__name__)
 basicConfig(level=INFO)
 
 
-def get_document_id_by_gov_id(transaction_executor, government_id):
+def get_document_id_by_gov_id(driver, government_id):
     """
     Find a driver's person ID using the given government ID.
 
-    :type transaction_executor: :py:class:`pyqldb.execution.executor.Executor`
-    :param transaction_executor: An Executor object allowing for execution of statements within a transaction.
+    :type driver: :py:class:`pyqldb.driver.qldb_driver.QldbDriver`
+    :param driver: An instance of the QldbDriver class.
 
     :type government_id: str
     :param government_id: A driver's government ID.
@@ -41,15 +41,16 @@ def get_document_id_by_gov_id(transaction_executor, government_id):
     :return: A list of document IDs.
     """
     logger.info("Finding secondary owner's person ID using given government ID: {}.".format(government_id))
-    return get_document_ids(transaction_executor, Constants.PERSON_TABLE_NAME, 'GovId', government_id)
+    return driver.execute_lambda(lambda executor: get_document_ids(executor, Constants.PERSON_TABLE_NAME, 'GovId',
+                                                                   government_id))
 
 
-def is_secondary_owner_for_vehicle(transaction_executor, vin, secondary_owner_id):
+def is_secondary_owner_for_vehicle(driver, vin, secondary_owner_id):
     """
     Check whether a secondary owner has already been registered for the given VIN.
 
-    :type transaction_executor: :py:class:`pyqldb.execution.executor.Executor`
-    :param transaction_executor: An Executor object allowing for execution of statements within a transaction.
+    :type driver: :py:class:`pyqldb.driver.qldb_driver.QldbDriver`
+    :param driver: An instance of the QldbDriver class.
 
     :type vin: str
     :param vin: VIN of the vehicle to query.
@@ -62,7 +63,7 @@ def is_secondary_owner_for_vehicle(transaction_executor, vin, secondary_owner_id
     """
     logger.info('Finding secondary owners for vehicle with VIN: {}...'.format(vin))
     query = 'SELECT Owners.SecondaryOwners FROM VehicleRegistration AS v WHERE v.VIN = ?'
-    rows = transaction_executor.execute_statement(query, convert_object_to_ion(vin))
+    rows = driver.execute_lambda(lambda executor: executor.execute_statement(query, convert_object_to_ion(vin)))
 
     for row in rows:
         secondary_owners = row.get('SecondaryOwners')
@@ -72,12 +73,12 @@ def is_secondary_owner_for_vehicle(transaction_executor, vin, secondary_owner_id
     return False
 
 
-def add_secondary_owner_for_vin(transaction_executor, vin, parameter):
+def add_secondary_owner_for_vin(driver, vin, parameter):
     """
     Add a secondary owner into `VehicleRegistration` table for a particular VIN.
 
-    :type transaction_executor: :py:class:`pyqldb.execution.executor.Executor`
-    :param transaction_executor: An Executor object allowing for execution of statements within a transaction.
+    :type driver: :py:class:`pyqldb.driver.qldb_driver.QldbDriver`
+    :param driver: An instance of the QldbDriver class.
 
     :type vin: str
     :param vin: VIN of the vehicle to add a secondary owner for.
@@ -90,17 +91,17 @@ def add_secondary_owner_for_vin(transaction_executor, vin, parameter):
     statement = "FROM VehicleRegistration AS v WHERE v.VIN = '{}' INSERT INTO v.Owners.SecondaryOwners VALUE ?"\
         .format(vin)
 
-    cursor = transaction_executor.execute_statement(statement, parameter)
+    cursor = driver.execute_lambda(lambda executor: executor.execute_statement(statement, parameter))
     logger.info('VehicleRegistration Document IDs which had secondary owners added: ')
     print_result(cursor)
 
 
-def register_secondary_owner(transaction_executor, vin, gov_id):
+def register_secondary_owner(driver, vin, gov_id):
     """
     Register a secondary owner for a vehicle if they are not already registered.
 
-    :type transaction_executor: :py:class:`pyqldb.execution.executor.Executor`
-    :param transaction_executor: An Executor object allowing for execution of statements within a transaction.
+    :type driver: :py:class:`pyqldb.driver.qldb_driver.QldbDriver`
+    :param driver: An instance of the QldbDriver class.
 
     :type vin: str
     :param vin: VIN of the vehicle to register a secondary owner for.
@@ -109,13 +110,14 @@ def register_secondary_owner(transaction_executor, vin, gov_id):
     :param gov_id: The government ID of the owner.
     """
     logger.info('Finding the secondary owners for vehicle with VIN: {}.'.format(vin))
-    document_ids = get_document_id_by_gov_id(transaction_executor, gov_id)
+
+    document_ids = get_document_id_by_gov_id(driver, gov_id)
 
     for document_id in document_ids:
-        if is_secondary_owner_for_vehicle(transaction_executor, vin, document_id):
+        if is_secondary_owner_for_vehicle(driver, vin, document_id):
             logger.info('Person with ID {} has already been added as a secondary owner of this vehicle.'.format(gov_id))
         else:
-            add_secondary_owner_for_vin(transaction_executor, vin, to_ion_struct('PersonId', document_id))
+            add_secondary_owner_for_vin(driver, vin, to_ion_struct('PersonId', document_id))
 
 
 if __name__ == '__main__':
@@ -126,7 +128,7 @@ if __name__ == '__main__':
     gov_id = SampleData.PERSON[0]['GovId']
     try:
         with create_qldb_driver() as driver:
-            driver.execute_lambda(lambda executor: register_secondary_owner(executor, vin, gov_id))
+            register_secondary_owner(driver, vin, gov_id)
             logger.info('Secondary owners successfully updated.')
     except Exception:
         logger.exception('Error adding secondary owner.')

@@ -20,6 +20,7 @@ from logging import basicConfig, getLogger, INFO
 from amazon.ion.simple_types import IonPyBool, IonPyBytes, IonPyDecimal, IonPyDict, IonPyFloat, IonPyInt, IonPyList, \
     IonPyNull, IonPySymbol, IonPyText, IonPyTimestamp
 from amazon.ion.simpleion import dumps, loads
+from pyqldb.cursor.buffered_cursor import BufferedCursor
 
 logger = getLogger(__name__)
 basicConfig(level=INFO)
@@ -274,8 +275,7 @@ def get_document_ids(transaction_executor, table_name, field, value):
     """
     query = "SELECT id FROM {} AS t BY id WHERE t.{} = '{}'".format(table_name, field, value)
     cursor = transaction_executor.execute_statement(query)
-    list_of_ids = map(lambda table: table.get('id'), cursor)
-    return list_of_ids
+    return list(map(lambda table: table.get('id'), cursor))
 
 
 def get_document_ids_from_dml_results(result):
