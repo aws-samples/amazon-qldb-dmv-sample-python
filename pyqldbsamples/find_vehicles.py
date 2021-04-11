@@ -26,23 +26,24 @@ logger = getLogger(__name__)
 basicConfig(level=INFO)
 
 
-def find_vehicles_for_owner(transaction_executor, gov_id):
+def find_vehicles_for_owner(driver, gov_id):
     """
     Find vehicles registered under a driver using their government ID.
 
-    :type transaction_executor: :py:class:`pyqldb.execution.executor.Executor`
-    :param transaction_executor: An Executor object allowing for execution of statements within a transaction.
+    :type driver: :py:class:`pyqldb.driver.qldb_driver.QldbDriver`
+    :param driver: An instance of the QldbDriver class.
 
     :type gov_id: str
     :param gov_id: The owner's government ID.
     """
-    document_ids = get_document_ids(transaction_executor, Constants.PERSON_TABLE_NAME, 'GovId', gov_id)
+    document_ids = driver.execute_lambda(lambda executor: get_document_ids(executor, Constants.PERSON_TABLE_NAME,
+                                                                           'GovId', gov_id))
 
     query = "SELECT Vehicle FROM Vehicle INNER JOIN VehicleRegistration AS r " \
             "ON Vehicle.VIN = r.VIN WHERE r.Owners.PrimaryOwner.PersonId = ?"
 
     for ids in document_ids:
-        cursor = transaction_executor.execute_statement(query, ids)
+        cursor = driver.execute_lambda(lambda executor: executor.execute_statement(query, ids))
         logger.info('List of Vehicles for owner with GovId: {}...'.format(gov_id))
         print_result(cursor)
 
@@ -55,6 +56,6 @@ if __name__ == '__main__':
         with create_qldb_driver() as driver:
             # Find all vehicles registered under a person.
             gov_id = SampleData.PERSON[0]['GovId']
-            driver.execute_lambda(lambda executor: find_vehicles_for_owner(executor, gov_id))
+            find_vehicles_for_owner(driver, gov_id)
     except Exception:
         logger.exception('Error getting vehicles for owner.')

@@ -89,51 +89,57 @@ def lookup_drivers_license_for_person(transaction_executor, person_id):
     return cursor
 
 
-def register_new_driver(transaction_executor, driver):
+def register_new_person(driver, person):
     """
-    Register a new driver in QLDB if not already registered.
+    Register a new person in QLDB if not already registered.
 
-    :type transaction_executor: :py:class:`pyqldb.execution.executor.Executor`
-    :param transaction_executor: An Executor object allowing for execution of statements within a transaction.
+    :type driver: :py:class:`pyqldb.driver.qldb_driver.QldbDriver`
+    :param driver: An instance of the QldbDriver class.
 
-    :type driver: dict
-    :param driver: The driver's license to register.
+    :type person: dict
+    :param person: The person to register.
+
+    :rtype: str
+    :return: The person ID.
     """
-    gov_id = driver['GovId']
-    if person_already_exists(transaction_executor, gov_id):
+    gov_id = person['GovId']
+    if driver.execute_lambda(lambda executor: person_already_exists(executor, gov_id)):
         logger.info('Person with this GovId already exists.')
-        result = next(get_document_ids(transaction_executor, Constants.PERSON_TABLE_NAME, 'GovId', gov_id))
+
+        result = driver.execute_lambda(lambda executor: get_document_ids(executor, Constants.PERSON_TABLE_NAME,
+                                                                         'GovId', gov_id))
+        result = result[0]
     else:
-        result = insert_documents(transaction_executor, Constants.PERSON_TABLE_NAME, [driver])
+        result = insert_documents(driver, Constants.PERSON_TABLE_NAME, [person])
         result = result[0]
     return result
 
 
-def register_new_drivers_license(transaction_executor, driver, new_license):
+def register_new_drivers_license(driver, person, new_license):
     """
-    Register a new driver and a new driver's license in a single transaction.
+    Register a new person and a new driver's license.
 
-    :type transaction_executor: :py:class:`pyqldb.execution.executor.Executor`
-    :param transaction_executor: An Executor object allowing for execution of statements within a transaction.
+    :type driver: :py:class:`pyqldb.driver.qldb_driver.QldbDriver`
+    :param driver: An instance of the QldbDriver class.
 
-    :type driver: dict
-    :param driver: The driver's license to register.
+    :type person: dict
+    :param person: The person to register.
 
     :type new_license: dict
     :param new_license: The driver's license to register.
     """
-    person_id = register_new_driver(transaction_executor, driver)
-    if person_has_drivers_license(transaction_executor, person_id):
-        gov_id = driver['GovId']
+    person_id = register_new_person(driver, person)
+    if driver.execute_lambda(lambda executor: person_has_drivers_license(executor, person_id)):
+        gov_id = person['GovId']
         logger.info("Person with government ID '{}' already has a license! No new license added.".format(gov_id))
     else:
         logger.info("Registering new driver's license...")
         # Update the new license with new driver's unique PersonId.
         new_license.update({'PersonId': str(person_id)})
         statement = 'INSERT INTO DriversLicense ?'
-        transaction_executor.execute_statement(statement, convert_object_to_ion(new_license))
+        driver.execute_lambda(lambda executor: executor.execute_statement(statement, convert_object_to_ion(new_license)))
 
-        cursor = lookup_drivers_license_for_person(transaction_executor, person_id)
+        cursor = driver.execute_lambda(lambda executor: lookup_drivers_license_for_person(executor, person_id))
         try:
             next(cursor)
             logger.info('Successfully registered new driver.')
@@ -149,7 +155,7 @@ if __name__ == '__main__':
     """
     try:
         with create_qldb_driver() as driver:
-            new_driver = {
+            person = {
                 'FirstName': 'Kate',
                 'LastName': 'Mulberry',
                 'Address': '22 Commercial Drive, Blaine, WA, 97722',
@@ -164,6 +170,6 @@ if __name__ == '__main__':
                 'ValidFromDate': datetime(2018, 6, 30),
                 'ValidToDate': datetime(2022, 10, 30)
             }
-            driver.execute_lambda(lambda executor: register_new_drivers_license(executor, new_driver, drivers_license))
+            register_new_drivers_license(driver, person, drivers_license)
     except Exception:
         logger.exception('Error registering new driver.')

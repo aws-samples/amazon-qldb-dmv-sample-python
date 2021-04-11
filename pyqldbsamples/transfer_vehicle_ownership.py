@@ -45,12 +45,12 @@ def find_person_from_document_id(transaction_executor, document_id):
     return next(cursor)
 
 
-def find_primary_owner_for_vehicle(transaction_executor, vin):
+def find_primary_owner_for_vehicle(driver, vin):
     """
     Find the primary owner of a vehicle given its VIN.
 
-    :type transaction_executor: :py:class:`pyqldb.execution.executor.Executor`
-    :param transaction_executor: An Executor object allowing for execution of statements within a transaction.
+    :type driver: :py:class:`pyqldb.driver.qldb_driver.QldbDriver`
+    :param driver: An instance of the QldbDriver class.
 
     :type vin: str
     :param vin: The VIN to find primary owner for.
@@ -60,20 +60,21 @@ def find_primary_owner_for_vehicle(transaction_executor, vin):
     """
     logger.info('Finding primary owner for vehicle with VIN: {}.'.format(vin))
     query = "SELECT Owners.PrimaryOwner.PersonId FROM VehicleRegistration AS v WHERE v.VIN = ?"
-    cursor = transaction_executor.execute_statement(query, convert_object_to_ion(vin))
+    cursor = driver.execute_lambda(lambda executor: executor.execute_statement(query, convert_object_to_ion(vin)))
     try:
-        return find_person_from_document_id(transaction_executor, next(cursor).get('PersonId'))
+        return driver.execute_lambda(lambda executor: find_person_from_document_id(executor,
+                                                                                   next(cursor).get('PersonId')))
     except StopIteration:
         logger.error('No primary owner registered for this vehicle.')
         return None
 
 
-def update_vehicle_registration(transaction_executor, vin, document_id):
+def update_vehicle_registration(driver, vin, document_id):
     """
     Update the primary owner for a vehicle using the given VIN.
 
-    :type transaction_executor: :py:class:`pyqldb.execution.executor.Executor`
-    :param transaction_executor: An Executor object allowing for execution of statements within a transaction.
+    :type driver: :py:class:`pyqldb.driver.qldb_driver.QldbDriver`
+    :param driver: An instance of the QldbDriver class.
 
     :type vin: str
     :param vin: The VIN for the vehicle to operate on.
@@ -85,7 +86,8 @@ def update_vehicle_registration(transaction_executor, vin, document_id):
     """
     logger.info('Updating the primary owner for vehicle with Vin: {}...'.format(vin))
     statement = "UPDATE VehicleRegistration AS r SET r.Owners.PrimaryOwner.PersonId = ? WHERE r.VIN = ?"
-    cursor = transaction_executor.execute_statement(statement, document_id, convert_object_to_ion(vin))
+    cursor = driver.execute_lambda(lambda executor: executor.execute_statement(statement, document_id,
+                                                                               convert_object_to_ion(vin)))
     try:
         print_result(cursor)
         logger.info('Successfully transferred vehicle with VIN: {} to new owner.'.format(vin))
@@ -93,12 +95,12 @@ def update_vehicle_registration(transaction_executor, vin, document_id):
         raise RuntimeError('Unable to transfer vehicle, could not find registration.')
 
 
-def validate_and_update_registration(transaction_executor, vin, current_owner, new_owner):
+def validate_and_update_registration(driver, vin, current_owner, new_owner):
     """
-    Validate the current owner of the given vehicle and transfer its ownership to a new owner in a single transaction.
+    Validate the current owner of the given vehicle and transfer its ownership to a new owner.
 
-    :type transaction_executor: :py:class:`pyqldb.execution.executor.Executor`
-    :param transaction_executor: An Executor object allowing for execution of statements within a transaction.
+    :type driver: :py:class:`pyqldb.driver.qldb_driver.QldbDriver`
+    :param driver: An instance of the QldbDriver class.
 
     :type vin: str
     :param vin: The VIN of the vehicle to transfer ownership of.
@@ -111,13 +113,13 @@ def validate_and_update_registration(transaction_executor, vin, current_owner, n
 
     :raises RuntimeError: If unable to verify primary owner.
     """
-    primary_owner = find_primary_owner_for_vehicle(transaction_executor, vin)
+    primary_owner = find_primary_owner_for_vehicle(driver, vin)
     if primary_owner is None or primary_owner['GovId'] != current_owner:
         raise RuntimeError('Incorrect primary owner identified for vehicle, unable to transfer.')
 
-    document_id = next(get_document_ids(transaction_executor, Constants.PERSON_TABLE_NAME, 'GovId', new_owner))
-
-    update_vehicle_registration(transaction_executor, vin, document_id)
+    document_ids = driver.execute_lambda(lambda executor: get_document_ids(executor, Constants.PERSON_TABLE_NAME,
+                                                                           'GovId', new_owner))
+    update_vehicle_registration(driver, vin, document_ids[0])
 
 
 if __name__ == '__main__':
@@ -131,7 +133,6 @@ if __name__ == '__main__':
 
     try:
         with create_qldb_driver() as driver:
-            driver.execute_lambda(lambda executor: validate_and_update_registration(executor, vehicle_vin,
-                                                                                     previous_owner, new_owner))
+            validate_and_update_registration(driver, vehicle_vin, previous_owner, new_owner)
     except Exception:
         logger.exception('Error updating VehicleRegistration.')

@@ -281,7 +281,7 @@ def get_document_ids_from_dml_results(result):
     """
     Return a list of modified document IDs as strings from DML results.
 
-    :type result: :py:class:`pyqldb.cursor.stream_cursor.StreamCursor`
+    :type result: :py:class:`pyqldb.cursor.buffered_cursor.BufferedCursor`
     :param: result: The result set from DML operation.
 
     :rtype: list
