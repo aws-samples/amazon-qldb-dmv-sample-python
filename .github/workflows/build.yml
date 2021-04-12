@@ -15,7 +15,7 @@ jobs:
     strategy:
       max-parallel: 1
       matrix :
-        os: [ubuntu-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: [3.6, 3.7, 3.8]
     steps:
     - name: Configure AWS Credentials
@@ -24,7 +24,7 @@ jobs:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-        aws-region: us-east-1
+
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v1
@@ -43,6 +43,4 @@ jobs:
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
-      run: |
-        pip install pytest
-        pytest
+      run: pytest

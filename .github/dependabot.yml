@@ -3,6 +3,5 @@ updates:
   - package-ecosystem: "pip"
     directory: "/"
     target-branch: "master"
-    open-pull-requests-limit: 15
     schedule:
       interval: "daily"
