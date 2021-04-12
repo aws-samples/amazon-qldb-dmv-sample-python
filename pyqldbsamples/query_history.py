@@ -68,7 +68,7 @@ def previous_primary_owners(driver, vin):
             logger.info('No modification history found within the given time frame for document ID: {}'.format(ids))
 
 
-if __name__ == '__main__':
+def main():
     """
     Query a table's history for a particular set of documents.
     """
@@ -77,5 +77,10 @@ if __name__ == '__main__':
             vin = SampleData.VEHICLE_REGISTRATION[0]['VIN']
             previous_primary_owners(driver, vin)
             logger.info('Successfully queried history.')
-    except Exception:
+    except Exception as e:
         logger.exception('Unable to query history to find previous owners.')
+        raise e
+
+
+if __name__ == '__main__':
+    main()

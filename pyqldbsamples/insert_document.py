@@ -88,7 +88,7 @@ def update_and_insert_documents(driver):
     insert_documents(driver, Constants.DRIVERS_LICENSE_TABLE_NAME, new_licenses)
 
 
-if __name__ == '__main__':
+def main():
     """
     Insert documents into a table in a QLDB ledger.
     """
@@ -98,5 +98,10 @@ if __name__ == '__main__':
             # QLDB also assigns a unique document identifier in GUID format as part of the metadata.
             update_and_insert_documents(driver)
             logger.info('Documents inserted successfully!')
-    except Exception:
+    except Exception as e:
         logger.exception('Error inserting or updating documents.')
+        raise e
+
+
+if __name__ == '__main__':
+    main()

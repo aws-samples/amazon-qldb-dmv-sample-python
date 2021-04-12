@@ -39,7 +39,7 @@ def list_ledgers():
     return ledgers
 
 
-if __name__ == '__main__':
+def main():
     """
     List all QLDB ledgers in a given account.
     """
@@ -48,3 +48,7 @@ if __name__ == '__main__':
     except Exception as e:
         logger.exception('Unable to list ledgers!')
         raise e
+
+
+if __name__ == '__main__':
+    main()

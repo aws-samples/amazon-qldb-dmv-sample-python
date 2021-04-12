@@ -98,14 +98,14 @@ def verify(journal_blocks):
     reduce(compare_journal_blocks, journal_blocks)
 
 
-if __name__ == '__main__':
+def main():
     """
-    Validate the hash chain of a QLDB ledger by stepping through its S3 export.
-    
-    This code accepts an exportID as an argument, if exportID is passed the code 
-    will use that or request QLDB to generate a new export to perform QLDB hash 
-    chain validation.
-    """
+     Validate the hash chain of a QLDB ledger by stepping through its S3 export.
+
+     This code accepts an exportID as an argument, if exportID is passed the code
+     will use that or request QLDB to generate a new export to perform QLDB hash
+     chain validation.
+     """
     s3_client = client('s3')
     try:
         if len(argv) == 2:
@@ -119,5 +119,10 @@ if __name__ == '__main__':
         journal_export = describe_journal_export(Constants.LEDGER_NAME, export_id).get('ExportDescription')
         journal_blocks = read_export(journal_export, s3_client)
         verify(journal_blocks)
-    except Exception:
+    except Exception as e:
         logger.exception('Unable to perform hash chain verification.')
+        raise e
+
+
+if __name__ == '__main__':
+    main()

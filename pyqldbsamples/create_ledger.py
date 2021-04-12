@@ -67,7 +67,7 @@ def wait_for_active(name):
         sleep(LEDGER_CREATION_POLL_PERIOD_SEC)
 
 
-if __name__ == '__main__':
+def main():
     """
     Create a ledger and wait for it to be active.
     """
@@ -77,3 +77,7 @@ if __name__ == '__main__':
     except Exception as e:
         logger.exception('Unable to create the ledger!')
         raise e
+
+
+if __name__ == '__main__':
+    main()

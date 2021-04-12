@@ -48,7 +48,7 @@ def describe_journal_export(ledger_name, export_id):
     return export_result
 
 
-if __name__ == '__main__':
+def main():
     """
     Describe a specific journal export with the given ExportId.
     """
@@ -63,3 +63,7 @@ if __name__ == '__main__':
     except Exception as e:
         logger.exception('Unable to describe an export!')
         raise e
+
+
+if __name__ == '__main__':
+    main()

@@ -181,7 +181,7 @@ def insert_and_verify_ion_types(driver):
     delete_table(driver, TABLE_NAME)
 
 
-if __name__ == '__main__':
+def main():
     """
     Insert all the supported Ion types and Python values that are convertible to Ion into a ledger and verify that they
     are stored and can be retrieved properly, retaining their original properties.
@@ -189,5 +189,10 @@ if __name__ == '__main__':
     try:
         with create_qldb_driver() as driver:
             insert_and_verify_ion_types(driver)
-    except Exception:
+    except Exception as e:
         logger.exception('Error updating and validating Ion types.')
+        raise e
+
+
+if __name__ == '__main__':
+    main()

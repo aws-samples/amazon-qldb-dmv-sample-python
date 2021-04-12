@@ -48,7 +48,7 @@ def find_vehicles_for_owner(driver, gov_id):
         print_result(cursor)
 
 
-if __name__ == '__main__':
+def main():
     """
     Find all vehicles registered under a person.
     """
@@ -57,5 +57,10 @@ if __name__ == '__main__':
             # Find all vehicles registered under a person.
             gov_id = SampleData.PERSON[0]['GovId']
             find_vehicles_for_owner(driver, gov_id)
-    except Exception:
+    except Exception as e:
         logger.exception('Error getting vehicles for owner.')
+        raise e
+
+
+if __name__ == '__main__':
+    main()

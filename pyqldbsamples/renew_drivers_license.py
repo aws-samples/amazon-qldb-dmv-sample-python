@@ -106,7 +106,7 @@ def verify_and_renew_license(driver, license_num, valid_from_date, valid_to_date
     renew_drivers_license(driver, valid_from_date, valid_to_date, license_num)
 
 
-if __name__ == '__main__':
+def main():
     """
     Find the person associated with a license number.
     Renew a driver's license.
@@ -115,5 +115,10 @@ if __name__ == '__main__':
         with create_qldb_driver() as driver:
             license_number = SampleData.DRIVERS_LICENSE[0]['LicenseNumber']
             verify_and_renew_license(driver, license_number, VALID_FROM_DATE, VALID_TO_DATE)
-    except Exception:
+    except Exception as e:
         logger.exception('Error renewing drivers license.')
+        raise e
+
+
+if __name__ == '__main__':
+    main()

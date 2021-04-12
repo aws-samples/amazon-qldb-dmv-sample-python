@@ -122,7 +122,7 @@ def validate_and_update_registration(driver, vin, current_owner, new_owner):
     update_vehicle_registration(driver, vin, document_ids[0])
 
 
-if __name__ == '__main__':
+def main():
     """
     Find primary owner for a particular vehicle's VIN.
     Transfer to another primary owner for a particular vehicle's VIN.
@@ -134,5 +134,10 @@ if __name__ == '__main__':
     try:
         with create_qldb_driver() as driver:
             validate_and_update_registration(driver, vehicle_vin, previous_owner, new_owner)
-    except Exception:
+    except Exception as e:
         logger.exception('Error updating VehicleRegistration.')
+        raise e
+
+
+if __name__ == '__main__':
+    main()

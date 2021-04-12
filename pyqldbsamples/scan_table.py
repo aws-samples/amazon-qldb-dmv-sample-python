@@ -43,7 +43,7 @@ def scan_table(driver, table_name):
     return driver.execute_lambda(lambda executor: executor.execute_statement(query))
 
 
-if __name__ == '__main__':
+def main():
     """
     Scan for all the documents in a table.
     """
@@ -55,5 +55,10 @@ if __name__ == '__main__':
                 cursor = scan_table(driver, table)
                 logger.info('Scan successful!')
                 print_result(cursor)
-    except Exception:
+    except Exception as e:
         logger.exception('Unable to scan tables.')
+        raise e
+
+
+if __name__ == '__main__':
+    main()

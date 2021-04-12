@@ -47,7 +47,7 @@ def create_index(driver, table_name, index_attribute):
     return len(list(cursor))
 
 
-if __name__ == '__main__':
+def main():
     """
     Create indexes on tables in a particular ledger.
     """
@@ -61,5 +61,10 @@ if __name__ == '__main__':
             create_index(driver, Constants.DRIVERS_LICENSE_TABLE_NAME, Constants.PERSON_ID_INDEX_NAME)
             create_index(driver, Constants.DRIVERS_LICENSE_TABLE_NAME, Constants.LICENSE_NUMBER_INDEX_NAME)
             logger.info('Indexes created successfully.')
-    except Exception:
+    except Exception as e:
         logger.exception('Unable to create indexes.')
+        raise e
+
+
+if __name__ == '__main__':
+    main()

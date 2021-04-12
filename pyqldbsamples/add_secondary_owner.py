@@ -120,7 +120,7 @@ def register_secondary_owner(driver, vin, gov_id):
             add_secondary_owner_for_vin(driver, vin, to_ion_struct('PersonId', document_id))
 
 
-if __name__ == '__main__':
+def main():
     """
     Finds and adds secondary owners for a vehicle.
     """
@@ -130,5 +130,10 @@ if __name__ == '__main__':
         with create_qldb_driver() as driver:
             register_secondary_owner(driver, vin, gov_id)
             logger.info('Secondary owners successfully updated.')
-    except Exception:
+    except Exception as e:
         logger.exception('Error adding secondary owner.')
+        raise e
+
+
+if __name__ == '__main__':
+    main()

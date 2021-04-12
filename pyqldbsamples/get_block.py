@@ -138,7 +138,7 @@ def verify_block(ledger_name, block_address):
         raise e
 
 
-if __name__ == '__main__':
+def main():
     """
     Get a journal block from a QLDB ledger.
 
@@ -152,5 +152,10 @@ if __name__ == '__main__':
             row = next(cursor)
             block_address = row.get('blockAddress')
             verify_block(Constants.LEDGER_NAME, block_address)
-    except Exception:
+    except Exception as e:
         logger.exception('Unable to query vehicle registration by Vin.')
+        raise e
+
+
+if __name__ == '__main__':
+    main()

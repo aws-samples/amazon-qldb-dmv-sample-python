@@ -46,7 +46,7 @@ def create_with_deletion_protection(ledger_name):
     return result
 
 
-if __name__ == '__main__':
+def main():
     """
     Demonstrate the protection of QLDB ledgers against deletion.
     """
@@ -59,5 +59,10 @@ if __name__ == '__main__':
             logger.info('Ledger protected against deletions! Turning off deletion protection now.')
         set_deletion_protection(LEDGER_NAME, False)
         delete_ledger(LEDGER_NAME)
-    except Exception:
+    except Exception as e:
         logger.exception('Error while updating or deleting the ledger!')
+        raise e
+
+
+if __name__ == '__main__':
+    main()

@@ -41,7 +41,7 @@ def describe_ledger(ledger_name):
     return result
 
 
-if __name__ == '__main__':
+def main():
     """
     Describe a QLDB ledger.
     """
@@ -49,3 +49,7 @@ if __name__ == '__main__':
         describe_ledger(Constants.LEDGER_NAME)
     except Exception:
         logger.exception('Unable to describe a ledger.')
+
+
+if __name__ == '__main__':
+    main()

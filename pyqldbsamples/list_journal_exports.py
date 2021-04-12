@@ -78,11 +78,16 @@ def list_journal_export_with_ledger_name(ledger_name):
     return list_of_results
 
 
-if __name__ == '__main__':
+def main():
     """
     List the journal exports of a given QLDB ledger.
     """
     try:
         list_journal_export_with_ledger_name(Constants.LEDGER_NAME)
-    except Exception:
+    except Exception as e:
         logger.exception('Unable to list exports!')
+        raise e
+
+
+if __name__ == '__main__':
+    main()

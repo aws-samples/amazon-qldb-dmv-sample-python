@@ -149,7 +149,7 @@ def register_new_drivers_license(driver, person, new_license):
             return
 
 
-if __name__ == '__main__':
+def main():
     """
     Register a new driver's license.
     """
@@ -170,6 +170,12 @@ if __name__ == '__main__':
                 'ValidFromDate': datetime(2018, 6, 30),
                 'ValidToDate': datetime(2022, 10, 30)
             }
+
             register_new_drivers_license(driver, person, drivers_license)
-    except Exception:
+    except Exception as e:
         logger.exception('Error registering new driver.')
+        raise e
+
+
+if __name__ == '__main__':
+    main()

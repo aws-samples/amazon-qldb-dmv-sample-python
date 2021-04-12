@@ -48,7 +48,7 @@ def deregister_drivers_license(driver, license_number):
         logger.error('Error de-registering license, license {} not found.'.format(license_number))
 
 
-if __name__ == '__main__':
+def main():
     """
     De-register a driver's license.
     """
@@ -57,5 +57,10 @@ if __name__ == '__main__':
     try:
         with create_qldb_driver() as driver:
             deregister_drivers_license(driver, license_number)
-    except Exception:
+    except Exception as e:
         logger.exception('Error deleting driver license.')
+        raise e
+
+
+if __name__ == '__main__':
+    main()

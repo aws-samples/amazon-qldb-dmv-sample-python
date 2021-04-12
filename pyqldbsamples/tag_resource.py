@@ -97,7 +97,7 @@ def list_tags(resource_arn):
     return result
 
 
-if __name__ == '__main__':
+def main():
     """
     Tagging and un-tagging resources, including tag on create.
     """
@@ -110,5 +110,10 @@ if __name__ == '__main__':
         list_tags(ARN)
         tag_resource(ARN, ADD_TAGS)
         list_tags(ARN)
-    except Exception:
+    except Exception as e:
         logger.exception('Unable to tag or untag resources!')
+        raise e
+
+
+if __name__ == '__main__':
+    main()

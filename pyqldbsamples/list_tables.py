@@ -40,7 +40,7 @@ def list_tables():
     return tables
 
 
-if __name__ == '__main__':
+def main():
     """
     List all the tables in the configured ledger in QLDB.
     """
@@ -49,3 +49,7 @@ if __name__ == '__main__':
     except Exception as e:
         logger.exception('Unable to list tables!')
         raise e
+
+
+if __name__ == '__main__':
+    main()

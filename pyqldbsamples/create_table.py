@@ -45,7 +45,7 @@ def create_table(driver, table_name):
     return len(list(cursor))
 
 
-if __name__ == '__main__':
+def main():
     """
     Create registrations, vehicles, owners, and licenses tables.
     """
@@ -56,5 +56,10 @@ if __name__ == '__main__':
             create_table(driver, Constants.VEHICLE_TABLE_NAME)
             create_table(driver, Constants.VEHICLE_REGISTRATION_TABLE_NAME)
             logger.info('Tables created successfully.')
-    except Exception:
+    except Exception as e:
         logger.exception('Errors creating tables.')
+        raise e
+
+
+if __name__ == '__main__':
+    main()
