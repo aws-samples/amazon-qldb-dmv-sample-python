@@ -9,11 +9,10 @@
 # CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
 # and limitations under the License.
 import sys
-import time
-from unittest import TestCase, mock
+from time import time
+from unittest import TestCase
 
-import pytest
-
+from pyqldb.driver.qldb_driver import QldbDriver
 from pyqldbsamples.add_secondary_owner import main as add_secondary_owner_main
 from pyqldbsamples.connect_to_ledger import main as connect_to_ledger_main
 from pyqldbsamples.constants import Constants
@@ -56,6 +55,7 @@ class TestIntegration(TestCase):
 
         create_ledger_main()
         create_table_main()
+        poll_for_table_creation()
         create_index_main()
         insert_document_main()
 
@@ -136,3 +136,14 @@ def force_delete_ledger(ledger_name):
         wait_for_deleted(ledger_name)
     except Exception:
         pass
+
+
+def poll_for_table_creation():
+    driver = QldbDriver(Constants.LEDGER_NAME)
+    # Wait 15 seconds
+    max_poll_time = time() + 15
+    while True:
+        tables = driver.list_tables()
+        count = len(list(tables))
+        if count == 4 or time() > max_poll_time:
+            break
