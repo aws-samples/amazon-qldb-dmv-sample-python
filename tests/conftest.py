@@ -21,4 +21,4 @@ def pytest_addoption(parser):
 @pytest.fixture(scope='class', autouse=True)
 def config_variables(request):
     # Set as class attribute on the invoking test context.
-    request.cls.ledger_name = request.config.getoption("--ledge_name").replace(".", "-")
+    request.cls.ledger_name = request.config.getoption("--ledger_name").replace(".", "-")
