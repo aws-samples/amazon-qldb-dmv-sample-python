@@ -47,14 +47,15 @@ from pyqldbsamples.validate_qldb_hash_chain import main as validate_qldb_hash_ch
 from pyqldbsamples.constants import Constants
 
 
+# The following tests only run the samples.
 @pytest.mark.usefixtures("config_variables")
 class TestIntegration(TestCase):
 
     @classmethod
     def setUpClass(cls):
         force_delete_ledger(cls.ledger_name)
-        force_delete_ledger(cls.ledger_name + "delete")
-        force_delete_ledger(cls.ledger_name + "tags")
+        force_delete_ledger(cls.ledger_name + "-delete")
+        force_delete_ledger(cls.ledger_name + "-tags")
 
         create_ledger_main(cls.ledger_name)
         create_table_main(cls.ledger_name)
@@ -65,6 +66,8 @@ class TestIntegration(TestCase):
     @classmethod
     def tearDownClass(cls):
         delete_ledger_main(cls.ledger_name)
+        delete_ledger_main(cls.ledger_name + "-delete")
+        delete_ledger_main(cls.ledger_name + "-tags")
 
     def test_list_ledgers(self):
         list_ledgers_main()
@@ -92,6 +95,9 @@ class TestIntegration(TestCase):
     #     sys.argv[1:] = [export_id]
     #     describe_journal_export_main()
 
+    # def test_validate_qldb_hash_chain(self):
+    #     validate_qldb_hash_chain_main(self.ledger_name)
+
     def test_describe_ledger(self):
         describe_ledger_main(self.ledger_name)
 
@@ -111,13 +117,10 @@ class TestIntegration(TestCase):
         renew_drivers_license_main(self.ledger_name)
 
     def test_deletion_protection(self):
-        deletion_protection_main(self.ledger_name + "delete")
+        deletion_protection_main(self.ledger_name + "-delete")
 
     def test_list_journal_exports(self):
         list_journal_exports_main(self.ledger_name)
-
-    # def test_validate_qldb_hash_chain(self):
-    #     validate_qldb_hash_chain_main(self.ledger_name)
 
     def test_get_revision(self):
         get_revision_main(self.ledger_name)
@@ -129,7 +132,7 @@ class TestIntegration(TestCase):
         get_digest_main(self.ledger_name)
 
     def test_tag_resource(self):
-        tag_resource_main(self.ledger_name + "tags")
+        tag_resource_main(self.ledger_name + "-tags")
 
 
 def force_delete_ledger(ledger_name):
