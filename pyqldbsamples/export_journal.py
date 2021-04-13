@@ -226,7 +226,7 @@ def create_export_and_wait_for_completion(name, bucket, prefix, encryption_confi
         end_time = datetime.utcnow()
 
         result = create_export(name, start_time, end_time, bucket, prefix, encryption_config, role_arn)
-        wait_for_export_to_complete(Constants.LEDGER_NAME, result.get('ExportId'))
+        wait_for_export_to_complete(name, result.get('ExportId'))
         logger.info('JournalS3Export for exportId {} is completed.'.format(result.get('ExportId')))
         return result
     except Exception as e:

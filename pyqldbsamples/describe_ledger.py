@@ -47,8 +47,9 @@ def main(ledger_name=Constants.LEDGER_NAME):
     """
     try:
         describe_ledger(ledger_name)
-    except Exception:
+    except Exception as e:
         logger.exception('Unable to describe a ledger.')
+        raise e
 
 
 if __name__ == '__main__':

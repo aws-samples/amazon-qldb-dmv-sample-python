@@ -13,21 +13,21 @@ from time import time
 from unittest import TestCase
 
 import pytest
+from boto3 import resource
 from pyqldb.driver.qldb_driver import QldbDriver
 from pyqldbsamples.add_secondary_owner import main as add_secondary_owner_main
 from pyqldbsamples.connect_to_ledger import main as connect_to_ledger_main
-from pyqldbsamples.constants import Constants
 from pyqldbsamples.create_index import main as create_index_main
 from pyqldbsamples.create_ledger import main as create_ledger_main
 from pyqldbsamples.create_table import main as create_table_main
 from pyqldbsamples.delete_ledger import main as delete_ledger_main
 from pyqldbsamples.delete_ledger import delete_ledger, set_deletion_protection, wait_for_deleted
 from pyqldbsamples.deletion_protection import main as deletion_protection_main
-from pyqldbsamples.deletion_protection import LEDGER_NAME as deletion_protection_ledger_name
 from pyqldbsamples.deregister_drivers_license import main as deregister_drivers_license_main
 from pyqldbsamples.describe_journal_export import main as describe_journal_export_main
 from pyqldbsamples.describe_ledger import main as describe_ledger_main
 from pyqldbsamples.export_journal import main as export_journal_main
+from pyqldbsamples.export_journal import create_export_role, set_up_s3_encryption_configuration
 from pyqldbsamples.find_vehicles import main as find_vehicles_main
 from pyqldbsamples.get_block import main as get_block_main
 from pyqldbsamples.get_digest import main as get_digest_main
@@ -44,7 +44,6 @@ from pyqldbsamples.scan_table import main as scan_table_main
 from pyqldbsamples.tag_resource import main as tag_resource_main
 from pyqldbsamples.transfer_vehicle_ownership import main as transfer_vehicle_ownership_main
 from pyqldbsamples.validate_qldb_hash_chain import main as validate_qldb_hash_chain_main
-from pyqldbsamples.constants import Constants
 
 
 # The following tests only run the samples.
@@ -53,9 +52,19 @@ class TestIntegration(TestCase):
 
     @classmethod
     def setUpClass(cls):
+        cls.role_name = cls.ledger_name + '-role'
+        cls.role_policy_name = cls.ledger_name + '-policy'
+        cls.s3_bucket_name = cls.ledger_name + '-bucket'
+        cls.deletion_ledger_name = cls.ledger_name + '-delete'
+        cls.tag_ledger_name = cls.ledger_name + '-tags'
+
+        s3_encryption_config = set_up_s3_encryption_configuration()
+        cls.role_arn = create_export_role(cls.role_name, s3_encryption_config.get('KmsKeyArn'), cls.role_policy_name,
+                                          cls.s3_bucket_name)
+
         force_delete_ledger(cls.ledger_name)
-        force_delete_ledger(cls.ledger_name + "-delete")
-        force_delete_ledger(cls.ledger_name + "-tags")
+        force_delete_ledger(cls.deletion_ledger_name)
+        force_delete_ledger(cls.tag_ledger_name)
 
         create_ledger_main(cls.ledger_name)
         create_table_main(cls.ledger_name)
@@ -65,8 +74,13 @@ class TestIntegration(TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        delete_role_policies(cls.role_name)
+        delete_role(cls.role_name)
+        delete_s3_bucket(cls.s3_bucket_name)
+
         delete_ledger_main(cls.ledger_name)
-        delete_ledger_main(cls.ledger_name + "-tags")
+        force_delete_ledger(cls.deletion_ledger_name)
+        force_delete_ledger(cls.tag_ledger_name)
 
     def test_list_ledgers(self):
         list_ledgers_main()
@@ -89,13 +103,15 @@ class TestIntegration(TestCase):
     def test_deregister_drivers_license(self):
         deregister_drivers_license_main(self.ledger_name)
 
-    # def test_export_journal_and_describe_journal_export(self):
-    #     export_id = export_journal_main().get('ExportId')
-    #     sys.argv[1:] = [export_id]
-    #     describe_journal_export_main()
+    def test_export_journal_and_describe_journal_export_and_validate_qldb_hash(self):
+        sys.argv[1:] = [self.s3_bucket_name, self.role_arn]
+        export_id = export_journal_main(self.ledger_name).get('ExportId')
 
-    # def test_validate_qldb_hash_chain(self):
-    #     validate_qldb_hash_chain_main(self.ledger_name)
+        sys.argv[1:] = [export_id]
+        describe_journal_export_main(self.ledger_name)
+
+        sys.argv[1:] = [export_id]
+        validate_qldb_hash_chain_main(self.ledger_name)
 
     def test_describe_ledger(self):
         describe_ledger_main(self.ledger_name)
@@ -116,7 +132,7 @@ class TestIntegration(TestCase):
         renew_drivers_license_main(self.ledger_name)
 
     def test_deletion_protection(self):
-        deletion_protection_main(self.ledger_name + "-delete")
+        deletion_protection_main(self.deletion_ledger_name)
 
     def test_list_journal_exports(self):
         list_journal_exports_main(self.ledger_name)
@@ -131,7 +147,7 @@ class TestIntegration(TestCase):
         get_digest_main(self.ledger_name)
 
     def test_tag_resource(self):
-        tag_resource_main(self.ledger_name + "-tags")
+        tag_resource_main(self.tag_ledger_name)
 
 
 def force_delete_ledger(ledger_name):
@@ -151,3 +167,30 @@ def poll_for_table_creation(ledger_name):
         count = len(list(tables))
         if count == 4 or time() > max_poll_time:
             break
+
+
+def delete_s3_bucket(bucket_name):
+    s3_resource = resource('s3')
+    bucket = s3_resource.Bucket(bucket_name)
+
+    for key in bucket.objects.all():
+        key.delete()
+    bucket.delete()
+
+
+def delete_role(role_name):
+    iam = resource('iam')
+    role = iam.Role(role_name)
+    role.delete()
+
+
+def delete_role_policies(role_name):
+    iam_client = resource('iam')
+
+    role = iam_client.Role(role_name)
+    list_of_polices = list(role.attached_policies.all())
+    for policy in list_of_polices:
+        policy.detach_role(RoleName=role_name)
+
+        policy = iam_client.Policy(policy.arn)
+        policy.delete()
