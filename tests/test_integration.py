@@ -66,7 +66,6 @@ class TestIntegration(TestCase):
     @classmethod
     def tearDownClass(cls):
         delete_ledger_main(cls.ledger_name)
-        delete_ledger_main(cls.ledger_name + "-delete")
         delete_ledger_main(cls.ledger_name + "-tags")
 
     def test_list_ledgers(self):
