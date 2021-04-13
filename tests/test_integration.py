@@ -140,7 +140,6 @@ def force_delete_ledger(ledger_name):
 
 def poll_for_table_creation():
     driver = QldbDriver(Constants.LEDGER_NAME)
-    # Wait 15 seconds
     max_poll_time = time() + 15
     while True:
         tables = driver.list_tables()
