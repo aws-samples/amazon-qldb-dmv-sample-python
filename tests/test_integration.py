@@ -53,7 +53,7 @@ class TestIntegration(TestCase):
     @classmethod
     def setUpClass(cls):
         force_delete_ledger(cls.ledger_name)
-        force_delete_ledger(cls.ledger_name + "deletionProtection")
+        force_delete_ledger(cls.ledger_name + "delete")
         force_delete_ledger(cls.ledger_name + "tags")
 
         create_ledger_main(cls.ledger_name)
@@ -111,7 +111,7 @@ class TestIntegration(TestCase):
         renew_drivers_license_main(self.ledger_name)
 
     def test_deletion_protection(self):
-        deletion_protection_main(self.ledger_name + "deletionProtection")
+        deletion_protection_main(self.ledger_name + "delete")
 
     def test_list_journal_exports(self):
         list_journal_exports_main(self.ledger_name)
