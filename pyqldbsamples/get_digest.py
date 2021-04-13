@@ -44,12 +44,12 @@ def get_digest_result(name):
     return result
 
 
-def main():
+def main(ledger_name=Constants.LEDGER_NAME):
     """
     This is an example for retrieving the digest of a particular ledger.
     """
     try:
-        get_digest_result(Constants.LEDGER_NAME)
+        get_digest_result(ledger_name)
     except Exception as e:
         logger.exception('Unable to get a ledger digest!')
         raise e

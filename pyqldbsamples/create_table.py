@@ -45,12 +45,12 @@ def create_table(driver, table_name):
     return len(list(cursor))
 
 
-def main():
+def main(ledger_name=Constants.LEDGER_NAME):
     """
     Create registrations, vehicles, owners, and licenses tables.
     """
     try:
-        with create_qldb_driver() as driver:
+        with create_qldb_driver(ledger_name) as driver:
             create_table(driver, Constants.DRIVERS_LICENSE_TABLE_NAME)
             create_table(driver, Constants.PERSON_TABLE_NAME)
             create_table(driver, Constants.VEHICLE_TABLE_NAME)

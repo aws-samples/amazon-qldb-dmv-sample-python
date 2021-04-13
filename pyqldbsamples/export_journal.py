@@ -280,7 +280,7 @@ def create_export(ledger_name, start_time, end_time, s3_bucket_name, s3_prefix, 
         raise ipe
 
 
-def main():
+def main(ledger_name=Constants.LEDGER_NAME):
     """
     Export a journal to S3.
 
@@ -346,7 +346,7 @@ def main():
 
     s3_encryption_config = set_up_s3_encryption_configuration(kms_arn)
 
-    return create_export_and_wait_for_completion(Constants.LEDGER_NAME, s3_bucket_name, Constants.LEDGER_NAME + '/',
+    return create_export_and_wait_for_completion(ledger_name, s3_bucket_name, ledger_name + '/',
                                                  s3_encryption_config, role_arn)
 
 

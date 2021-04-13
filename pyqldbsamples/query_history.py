@@ -68,12 +68,12 @@ def previous_primary_owners(driver, vin):
             logger.info('No modification history found within the given time frame for document ID: {}'.format(ids))
 
 
-def main():
+def main(ledger_name=Constants.LEDGER_NAME):
     """
     Query a table's history for a particular set of documents.
     """
     try:
-        with create_qldb_driver() as driver:
+        with create_qldb_driver(ledger_name) as driver:
             vin = SampleData.VEHICLE_REGISTRATION[0]['VIN']
             previous_primary_owners(driver, vin)
             logger.info('Successfully queried history.')

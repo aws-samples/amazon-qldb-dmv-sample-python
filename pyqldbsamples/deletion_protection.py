@@ -46,19 +46,19 @@ def create_with_deletion_protection(ledger_name):
     return result
 
 
-def main():
+def main(ledger_name=LEDGER_NAME):
     """
     Demonstrate the protection of QLDB ledgers against deletion.
     """
     try:
-        create_with_deletion_protection(LEDGER_NAME)
-        wait_for_active(LEDGER_NAME)
+        create_with_deletion_protection(ledger_name)
+        wait_for_active(ledger_name)
         try:
-            delete_ledger(LEDGER_NAME)
+            delete_ledger(ledger_name)
         except qldb_client.exceptions.ResourcePreconditionNotMetException:
             logger.info('Ledger protected against deletions! Turning off deletion protection now.')
-        set_deletion_protection(LEDGER_NAME, False)
-        delete_ledger(LEDGER_NAME)
+        set_deletion_protection(ledger_name, False)
+        delete_ledger(ledger_name)
     except Exception as e:
         logger.exception('Error while updating or deleting the ledger!')
         raise e

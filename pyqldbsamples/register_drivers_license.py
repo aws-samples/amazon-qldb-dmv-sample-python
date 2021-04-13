@@ -149,12 +149,12 @@ def register_new_drivers_license(driver, person, new_license):
             return
 
 
-def main():
+def main(ledger_name=Constants.LEDGER_NAME):
     """
     Register a new driver's license.
     """
     try:
-        with create_qldb_driver() as driver:
+        with create_qldb_driver(ledger_name) as driver:
             person = {
                 'FirstName': 'Kate',
                 'LastName': 'Mulberry',

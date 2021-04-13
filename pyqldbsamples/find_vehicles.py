@@ -48,12 +48,12 @@ def find_vehicles_for_owner(driver, gov_id):
         print_result(cursor)
 
 
-def main():
+def main(ledger_name=Constants.LEDGER_NAME):
     """
     Find all vehicles registered under a person.
     """
     try:
-        with create_qldb_driver() as driver:
+        with create_qldb_driver(ledger_name) as driver:
             # Find all vehicles registered under a person.
             gov_id = SampleData.PERSON[0]['GovId']
             find_vehicles_for_owner(driver, gov_id)

@@ -120,14 +120,14 @@ def register_secondary_owner(driver, vin, gov_id):
             add_secondary_owner_for_vin(driver, vin, to_ion_struct('PersonId', document_id))
 
 
-def main():
+def main(ledger_name=Constants.LEDGER_NAME):
     """
     Finds and adds secondary owners for a vehicle.
     """
     vin = SampleData.VEHICLE[1]['VIN']
     gov_id = SampleData.PERSON[0]['GovId']
     try:
-        with create_qldb_driver() as driver:
+        with create_qldb_driver(ledger_name) as driver:
             register_secondary_owner(driver, vin, gov_id)
             logger.info('Secondary owners successfully updated.')
     except Exception as e:

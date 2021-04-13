@@ -78,12 +78,12 @@ def list_journal_export_with_ledger_name(ledger_name):
     return list_of_results
 
 
-def main():
+def main(ledger_name=Constants.LEDGER_NAME):
     """
     List the journal exports of a given QLDB ledger.
     """
     try:
-        list_journal_export_with_ledger_name(Constants.LEDGER_NAME)
+        list_journal_export_with_ledger_name(ledger_name)
     except Exception as e:
         logger.exception('Unable to list exports!')
         raise e

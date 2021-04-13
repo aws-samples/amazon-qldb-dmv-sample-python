@@ -138,7 +138,7 @@ def verify_block(ledger_name, block_address):
         raise e
 
 
-def main():
+def main(ledger_name=Constants.LEDGER_NAME):
     """
     Get a journal block from a QLDB ledger.
 
@@ -147,11 +147,11 @@ def main():
     """
     vin = SampleData.VEHICLE_REGISTRATION[1]['VIN']
     try:
-        with create_qldb_driver() as driver:
+        with create_qldb_driver(ledger_name) as driver:
             cursor = lookup_registration_for_vin(driver, vin)
             row = next(cursor)
             block_address = row.get('blockAddress')
-            verify_block(Constants.LEDGER_NAME, block_address)
+            verify_block(ledger_name, block_address)
     except Exception as e:
         logger.exception('Unable to query vehicle registration by Vin.')
         raise e

@@ -67,13 +67,13 @@ def wait_for_active(name):
         sleep(LEDGER_CREATION_POLL_PERIOD_SEC)
 
 
-def main():
+def main(ledger_name=Constants.LEDGER_NAME):
     """
     Create a ledger and wait for it to be active.
     """
     try:
-        create_ledger(Constants.LEDGER_NAME)
-        wait_for_active(Constants.LEDGER_NAME)
+        create_ledger(ledger_name)
+        wait_for_active(ledger_name)
     except Exception as e:
         logger.exception('Unable to create the ledger!')
         raise e

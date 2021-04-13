@@ -133,15 +133,15 @@ def verify_registration(driver, ledger_name, vin):
         logger.info('Finished verifying the registration with VIN = {} in ledger = {}.'.format(vin, ledger_name))
 
 
-def main():
+def main(ledger_name=Constants.LEDGER_NAME):
     """
     Verify the integrity of a document revision in a QLDB ledger.
     """
     registration = SampleData.VEHICLE_REGISTRATION[0]
     vin = registration['VIN']
     try:
-        with create_qldb_driver() as driver:
-            verify_registration(driver, Constants.LEDGER_NAME, vin)
+        with create_qldb_driver(ledger_name) as driver:
+            verify_registration(driver, ledger_name, vin)
     except Exception as e:
         logger.exception('Unable to verify revision.')
         raise e

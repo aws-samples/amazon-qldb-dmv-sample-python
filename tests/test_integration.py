@@ -12,6 +12,7 @@ import sys
 from time import time
 from unittest import TestCase
 
+import pytest
 from pyqldb.driver.qldb_driver import QldbDriver
 from pyqldbsamples.add_secondary_owner import main as add_secondary_owner_main
 from pyqldbsamples.connect_to_ledger import main as connect_to_ledger_main
@@ -43,90 +44,92 @@ from pyqldbsamples.scan_table import main as scan_table_main
 from pyqldbsamples.tag_resource import main as tag_resource_main
 from pyqldbsamples.transfer_vehicle_ownership import main as transfer_vehicle_ownership_main
 from pyqldbsamples.validate_qldb_hash_chain import main as validate_qldb_hash_chain_main
+from pyqldbsamples.constants import Constants
 
 
+@pytest.mark.usefixtures("config_variables")
 class TestIntegration(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        force_delete_ledger(Constants.LEDGER_NAME)
-        force_delete_ledger(deletion_protection_ledger_name)
-        force_delete_ledger(Constants.LEDGER_NAME_WITH_TAGS)
+        force_delete_ledger(cls.ledger_name)
+        force_delete_ledger(cls.ledger_name + "deletionProtection")
+        force_delete_ledger(cls.ledger_name + "tags")
 
-        create_ledger_main()
-        create_table_main()
-        poll_for_table_creation()
-        create_index_main()
-        insert_document_main()
+        create_ledger_main(cls.ledger_name)
+        create_table_main(cls.ledger_name)
+        poll_for_table_creation(cls.ledger_name)
+        create_index_main(cls.ledger_name)
+        insert_document_main(cls.ledger_name)
 
     @classmethod
     def tearDownClass(cls):
-        delete_ledger_main()
+        delete_ledger_main(cls.ledger_name)
 
     def test_list_ledgers(self):
         list_ledgers_main()
 
     def test_connect_to_ledger(self):
-        connect_to_ledger_main()
+        connect_to_ledger_main(self.ledger_name)
 
     def test_insert_ion_types(self):
-        insert_ion_types_main()
+        insert_ion_types_main(self.ledger_name)
 
     def test_scan_table(self):
-        scan_table_main()
+        scan_table_main(self.ledger_name)
 
     def test_find_vehicles(self):
-        find_vehicles_main()
+        find_vehicles_main(self.ledger_name)
 
     def test_add_secondary_owner(self):
-        add_secondary_owner_main()
+        add_secondary_owner_main(self.ledger_name)
 
     def test_deregister_drivers_license(self):
-        deregister_drivers_license_main()
+        deregister_drivers_license_main(self.ledger_name)
 
-    def test_export_journal_and_describe_journal_export(self):
-        export_id = export_journal_main().get('ExportId')
-        sys.argv[1:] = [export_id]
-        describe_journal_export_main()
+    # def test_export_journal_and_describe_journal_export(self):
+    #     export_id = export_journal_main().get('ExportId')
+    #     sys.argv[1:] = [export_id]
+    #     describe_journal_export_main()
 
     def test_describe_ledger(self):
-        describe_ledger_main()
+        describe_ledger_main(self.ledger_name)
 
     def test_transfer_vehicle_ownership(self):
-        transfer_vehicle_ownership_main()
+        transfer_vehicle_ownership_main(self.ledger_name)
 
     def test_query_history(self):
-        query_history_main()
+        query_history_main(self.ledger_name)
 
     def test_list_tables(self):
-        list_tables_main()
+        list_tables_main(self.ledger_name)
 
     def test_register_drivers_license(self):
-        register_drivers_license_main()
+        register_drivers_license_main(self.ledger_name)
 
     def test_renew_drivers_license(self):
-        renew_drivers_license_main()
+        renew_drivers_license_main(self.ledger_name)
 
     def test_deletion_protection(self):
-        deletion_protection_main()
+        deletion_protection_main(self.ledger_name + "deletionProtection")
 
     def test_list_journal_exports(self):
-        list_journal_exports_main()
+        list_journal_exports_main(self.ledger_name)
 
-    def test_validate_qldb_hash_chain(self):
-        validate_qldb_hash_chain_main()
+    # def test_validate_qldb_hash_chain(self):
+    #     validate_qldb_hash_chain_main(self.ledger_name)
 
     def test_get_revision(self):
-        get_revision_main()
+        get_revision_main(self.ledger_name)
 
     def test_get_block(self):
-        get_block_main()
+        get_block_main(self.ledger_name)
 
     def test_get_digest(self):
-        get_digest_main()
+        get_digest_main(self.ledger_name)
 
     def test_tag_resource(self):
-        tag_resource_main()
+        tag_resource_main(self.ledger_name + "tags")
 
 
 def force_delete_ledger(ledger_name):
@@ -138,8 +141,8 @@ def force_delete_ledger(ledger_name):
         pass
 
 
-def poll_for_table_creation():
-    driver = QldbDriver(Constants.LEDGER_NAME)
+def poll_for_table_creation(ledger_name):
+    driver = QldbDriver(ledger_name)
     max_poll_time = time() + 15
     while True:
         tables = driver.list_tables()

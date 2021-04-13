@@ -98,7 +98,7 @@ def verify(journal_blocks):
     reduce(compare_journal_blocks, journal_blocks)
 
 
-def main():
+def main(ledger_name=Constants.LEDGER_NAME):
     """
      Validate the hash chain of a QLDB ledger by stepping through its S3 export.
 
@@ -116,7 +116,7 @@ def main():
             logger.info('Requesting qldb to create an export.')
             export_id = create_journal_export()
 
-        journal_export = describe_journal_export(Constants.LEDGER_NAME, export_id).get('ExportDescription')
+        journal_export = describe_journal_export(ledger_name, export_id).get('ExportDescription')
         journal_blocks = read_export(journal_export, s3_client)
         verify(journal_blocks)
     except Exception as e:

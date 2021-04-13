@@ -48,7 +48,7 @@ def describe_journal_export(ledger_name, export_id):
     return export_result
 
 
-def main():
+def main(ledger_name=Constants.LEDGER_NAME):
     """
     Describe a specific journal export with the given ExportId.
     """
@@ -59,7 +59,7 @@ def main():
     logger.info('Running describe export journal tutorial with ExportId: {}.'.format(export_id))
 
     try:
-        describe_journal_export(Constants.LEDGER_NAME, export_id)
+        describe_journal_export(ledger_name, export_id)
     except Exception as e:
         logger.exception('Unable to describe an export!')
         raise e
