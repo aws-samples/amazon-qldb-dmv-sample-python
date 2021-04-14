@@ -118,7 +118,6 @@ if __name__ == '__main__':
         with create_qldb_driver() as driver:
             license_number = SampleData.DRIVERS_LICENSE[0]['LicenseNumber']
             driver.execute_lambda(lambda executor: verify_and_renew_license(executor, license_number,
-                                                                             VALID_FROM_DATE, VALID_TO_DATE),
-                                   lambda retry_attempt: logger.info('Retrying due to OCC conflict...'))
+                                                                             VALID_FROM_DATE, VALID_TO_DATE))
     except Exception:
         logger.exception('Error renewing drivers license.')

@@ -213,8 +213,7 @@ def insert_and_verify_ion_types(driver):
                                                              IonType.SYMBOL)
                            and update_record_and_verify_type(transaction_executor, ion_null_timestamp,
                                                              IonPyNull, IonType.TIMESTAMP)
-                           and delete_table(transaction_executor, TABLE_NAME),
-                           lambda retry_attempt: logger.info('Retrying due to OCC conflict...'))
+                           and delete_table(transaction_executor, TABLE_NAME))
 
 
 if __name__ == '__main__':

@@ -73,8 +73,7 @@ if __name__ == '__main__':
     try:
         with create_qldb_driver() as driver:
             vin = SampleData.VEHICLE_REGISTRATION[0]['VIN']
-            driver.execute_lambda(lambda lambda_executor: previous_primary_owners(lambda_executor, vin),
-                                   lambda retry_attempt: logger.info('Retrying due to OCC conflict...'))
+            driver.execute_lambda(lambda lambda_executor: previous_primary_owners(lambda_executor, vin))
             logger.info('Successfully queried history.')
     except Exception:
         logger.exception('Unable to query history to find previous owners.')

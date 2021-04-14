@@ -52,8 +52,7 @@ if __name__ == '__main__':
             # Scan all the tables and print their documents.
             tables = driver.list_tables()
             for table in tables:
-                cursor = driver.execute_lambda(
-                    lambda executor: scan_table(executor, table))
+                cursor = driver.execute_lambda(lambda executor: scan_table(executor, table))
                 logger.info('Scan successful!')
                 print_result(cursor)
     except Exception:
