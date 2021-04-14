@@ -25,12 +25,12 @@ logger = getLogger(__name__)
 basicConfig(level=INFO)
 
 
-def create_table(transaction_executor, table_name):
+def create_table(driver, table_name):
     """
-    Create a table with the specified name using an Executor object.
+    Create a table with the specified name.
 
-    :type transaction_executor: :py:class:`pyqldb.execution.executor.Executor`
-    :param transaction_executor: An Executor object allowing for execution of statements within a transaction.
+    :type driver: :py:class:`pyqldb.driver.qldb_driver.QldbDriver`
+    :param driver: An instance of the QldbDriver class.
 
     :type table_name: str
     :param table_name: Name of the table to create.
@@ -40,21 +40,21 @@ def create_table(transaction_executor, table_name):
     """
     logger.info("Creating the '{}' table...".format(table_name))
     statement = 'CREATE TABLE {}'.format(table_name)
-    cursor = transaction_executor.execute_statement(statement)
+    cursor = driver.execute_lambda(lambda executor: executor.execute_statement(statement))
     logger.info('{} table created successfully.'.format(table_name))
     return len(list(cursor))
 
 
 if __name__ == '__main__':
     """
-    Create registrations, vehicles, owners, and licenses tables in a single transaction.
+    Create registrations, vehicles, owners, and licenses tables.
     """
     try:
-        with create_qldb_driver() as qldb_driver:
-            qldb_driver.execute_lambda(lambda x: create_table(x, Constants.DRIVERS_LICENSE_TABLE_NAME) and
-                                   create_table(x, Constants.PERSON_TABLE_NAME) and
-                                   create_table(x, Constants.VEHICLE_TABLE_NAME) and
-                                   create_table(x, Constants.VEHICLE_REGISTRATION_TABLE_NAME))
+        with create_qldb_driver() as driver:
+            create_table(driver, Constants.DRIVERS_LICENSE_TABLE_NAME)
+            create_table(driver, Constants.PERSON_TABLE_NAME)
+            create_table(driver, Constants.VEHICLE_TABLE_NAME)
+            create_table(driver, Constants.VEHICLE_REGISTRATION_TABLE_NAME)
             logger.info('Tables created successfully.')
     except Exception:
         logger.exception('Errors creating tables.')

@@ -274,15 +274,14 @@ def get_document_ids(transaction_executor, table_name, field, value):
     """
     query = "SELECT id FROM {} AS t BY id WHERE t.{} = '{}'".format(table_name, field, value)
     cursor = transaction_executor.execute_statement(query)
-    list_of_ids = map(lambda table: table.get('id'), cursor)
-    return list_of_ids
+    return list(map(lambda table: table.get('id'), cursor))
 
 
 def get_document_ids_from_dml_results(result):
     """
     Return a list of modified document IDs as strings from DML results.
 
-    :type result: :py:class:`pyqldb.cursor.stream_cursor.StreamCursor`
+    :type result: :py:class:`pyqldb.cursor.buffered_cursor.BufferedCursor`
     :param: result: The result set from DML operation.
 
     :rtype: list

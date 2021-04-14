@@ -40,18 +40,20 @@ def format_date_time(date_time):
     return date_time.strftime('`%Y-%m-%dT%H:%M:%S.%fZ`')
 
 
-def previous_primary_owners(transaction_executor, vin):
+def previous_primary_owners(driver, vin):
     """
     Find previous primary owners for the given VIN in a single transaction.
     In this example, query the `VehicleRegistration` history table to find all previous primary owners for a VIN.
 
-    :type transaction_executor: :py:class:`pyqldb.execution.executor.Executor`
-    :param transaction_executor: An Executor object allowing for execution of statements within a transaction.
+    :type driver: :py:class:`pyqldb.driver.qldb_driver.QldbDriver`
+    :param driver: An instance of the QldbDriver class.
 
     :type vin: str
     :param vin: VIN to find previous primary owners for.
     """
-    person_ids = get_document_ids(transaction_executor, Constants.VEHICLE_REGISTRATION_TABLE_NAME, 'VIN', vin)
+    person_ids = driver.execute_lambda(lambda executor: get_document_ids(executor,
+                                                                         Constants.VEHICLE_REGISTRATION_TABLE_NAME,
+                                                                         'VIN', vin))
 
     todays_date = datetime.utcnow() - timedelta(seconds=1)
     three_months_ago = todays_date - timedelta(days=90)
@@ -61,7 +63,7 @@ def previous_primary_owners(transaction_executor, vin):
 
     for ids in person_ids:
         logger.info("Querying the 'VehicleRegistration' table's history using VIN: {}.".format(vin))
-        cursor = transaction_executor.execute_statement(query, ids)
+        cursor = driver.execute_lambda(lambda executor: executor.execute_statement(query, ids))
         if not (print_result(cursor)) > 0:
             logger.info('No modification history found within the given time frame for document ID: {}'.format(ids))
 
@@ -73,7 +75,7 @@ if __name__ == '__main__':
     try:
         with create_qldb_driver() as driver:
             vin = SampleData.VEHICLE_REGISTRATION[0]['VIN']
-            driver.execute_lambda(lambda lambda_executor: previous_primary_owners(lambda_executor, vin))
+            previous_primary_owners(driver, vin)
             logger.info('Successfully queried history.')
     except Exception:
         logger.exception('Unable to query history to find previous owners.')

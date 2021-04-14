@@ -46,12 +46,12 @@ def update_person_id(document_ids):
     return new_drivers_licenses, new_vehicle_registrations
 
 
-def insert_documents(transaction_executor, table_name, documents):
+def insert_documents(driver, table_name, documents):
     """
     Insert the given list of documents into a table in a single transaction.
 
-    :type transaction_executor: :py:class:`pyqldb.execution.executor.Executor`
-    :param transaction_executor: An Executor object allowing for execution of statements within a transaction.
+    :type driver: :py:class:`pyqldb.driver.qldb_driver.QldbDriver`
+    :param driver: An instance of the QldbDriver class.
 
     :type table_name: str
     :param table_name: Name of the table to insert documents into.
@@ -64,27 +64,28 @@ def insert_documents(transaction_executor, table_name, documents):
     """
     logger.info('Inserting some documents in the {} table...'.format(table_name))
     statement = 'INSERT INTO {} ?'.format(table_name)
-    cursor = transaction_executor.execute_statement(statement, convert_object_to_ion(documents))
+    cursor = driver.execute_lambda(lambda executor: executor.execute_statement(statement,
+                                                                               convert_object_to_ion(documents)))
     list_of_document_ids = get_document_ids_from_dml_results(cursor)
 
     return list_of_document_ids
 
 
-def update_and_insert_documents(transaction_executor):
+def update_and_insert_documents(driver):
     """
-    Handle the insertion of documents and updating PersonIds all in a single transaction.
+    Handle the insertion of documents and updating PersonIds.
 
-    :type transaction_executor: :py:class:`pyqldb.execution.executor.Executor`
-    :param transaction_executor: An Executor object allowing for execution of statements within a transaction.
+    :type driver: :py:class:`pyqldb.driver.qldb_driver.QldbDriver`
+    :param driver: An instance of the QldbDriver class.
     """
-    list_ids = insert_documents(transaction_executor, Constants.PERSON_TABLE_NAME, SampleData.PERSON)
+    list_ids = insert_documents(driver, Constants.PERSON_TABLE_NAME, SampleData.PERSON)
 
     logger.info("Updating PersonIds for 'DriversLicense' and PrimaryOwner for 'VehicleRegistration'...")
     new_licenses, new_registrations = update_person_id(list_ids)
 
-    insert_documents(transaction_executor, Constants.VEHICLE_TABLE_NAME, SampleData.VEHICLE)
-    insert_documents(transaction_executor, Constants.VEHICLE_REGISTRATION_TABLE_NAME, new_registrations)
-    insert_documents(transaction_executor, Constants.DRIVERS_LICENSE_TABLE_NAME, new_licenses)
+    insert_documents(driver, Constants.VEHICLE_TABLE_NAME, SampleData.VEHICLE)
+    insert_documents(driver, Constants.VEHICLE_REGISTRATION_TABLE_NAME, new_registrations)
+    insert_documents(driver, Constants.DRIVERS_LICENSE_TABLE_NAME, new_licenses)
 
 
 if __name__ == '__main__':
@@ -95,7 +96,7 @@ if __name__ == '__main__':
         with create_qldb_driver() as driver:
             # An INSERT statement creates the initial revision of a document with a version number of zero.
             # QLDB also assigns a unique document identifier in GUID format as part of the metadata.
-            driver.execute_lambda(lambda executor: update_and_insert_documents(executor))
+            update_and_insert_documents(driver)
             logger.info('Documents inserted successfully!')
     except Exception:
         logger.exception('Error inserting or updating documents.')

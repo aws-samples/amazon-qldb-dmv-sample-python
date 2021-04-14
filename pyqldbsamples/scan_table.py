@@ -25,22 +25,22 @@ logger = getLogger(__name__)
 basicConfig(level=INFO)
 
 
-def scan_table(transaction_executor, table_name):
+def scan_table(driver, table_name):
     """
     Scan for all the documents in a table.
 
-    :type transaction_executor: :py:class:`pyqldb.execution.executor.Executor`
-    :param transaction_executor: An Executor object allowing for execution of statements within a transaction.
+    :type driver: :py:class:`pyqldb.driver.qldb_driver.QldbDriver`
+    :param driver: An instance of the QldbDriver class.
 
     :type table_name: str
     :param table_name: The name of the table to operate on.
 
-    :rtype: :py:class:`pyqldb.cursor.stream_cursor.StreamCursor`
+    :rtype: :py:class:`pyqldb.cursor.buffered_cursor.BufferedCursor`
     :return: Cursor on the result set of a statement query.
     """
     logger.info('Scanning {}...'.format(table_name))
     query = 'SELECT * FROM {}'.format(table_name)
-    return transaction_executor.execute_statement(query)
+    return driver.execute_lambda(lambda executor: executor.execute_statement(query))
 
 
 if __name__ == '__main__':
@@ -52,7 +52,7 @@ if __name__ == '__main__':
             # Scan all the tables and print their documents.
             tables = driver.list_tables()
             for table in tables:
-                cursor = driver.execute_lambda(lambda executor: scan_table(executor, table))
+                cursor = scan_table(driver, table)
                 logger.info('Scan successful!')
                 print_result(cursor)
     except Exception:

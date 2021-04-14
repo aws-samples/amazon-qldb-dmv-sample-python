@@ -25,12 +25,12 @@ logger = getLogger(__name__)
 basicConfig(level=INFO)
 
 
-def deregister_drivers_license(transaction_executor, license_number):
+def deregister_drivers_license(driver, license_number):
     """
     De-register a driver's license with the given license number.
 
-    :type transaction_executor: :py:class:`pyqldb.execution.executor.Executor`
-    :param transaction_executor: An Executor object allowing for execution of statements within a transaction.
+    :type driver: :py:class:`pyqldb.driver.qldb_driver.QldbDriver`
+    :param driver: An instance of the QldbDriver class.
 
     :type license_number: str
     :param license_number: The license number of the driver's license to de-register.
@@ -38,7 +38,7 @@ def deregister_drivers_license(transaction_executor, license_number):
     logger.info('De-registering license with license number: {}.'.format(license_number))
     statement = 'DELETE FROM DriversLicense AS d WHERE d.LicenseNumber = ?'
     parameter = convert_object_to_ion(license_number)
-    cursor = transaction_executor.execute_statement(statement, parameter)
+    cursor = driver.execute_lambda(lambda executor: executor.execute_statement(statement, parameter))
 
     try:
         # Check whether cursor is empty.
@@ -56,6 +56,6 @@ if __name__ == '__main__':
 
     try:
         with create_qldb_driver() as driver:
-            driver.execute_lambda(lambda executor: deregister_drivers_license(executor, license_number))
+            deregister_drivers_license(driver, license_number)
     except Exception:
         logger.exception('Error deleting driver license.')

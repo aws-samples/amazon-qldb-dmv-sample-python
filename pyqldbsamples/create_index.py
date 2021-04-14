@@ -25,12 +25,12 @@ logger = getLogger(__name__)
 basicConfig(level=INFO)
 
 
-def create_index(transaction_executor, table_name, index_attribute):
+def create_index(driver, table_name, index_attribute):
     """
     Create an index for a particular table.
 
-    :type transaction_executor: :py:class:`pyqldb.execution.executor.Executor`
-    :param transaction_executor: An Executor object allowing for execution of statements within a transaction.
+    :type driver: :py:class:`pyqldb.driver.qldb_driver.QldbDriver`
+    :param driver: An instance of the QldbDriver class.
 
     :type table_name: str
     :param table_name: Name of the table to add indexes for.
@@ -43,7 +43,7 @@ def create_index(transaction_executor, table_name, index_attribute):
     """
     logger.info("Creating index on '{}'...".format(index_attribute))
     statement = 'CREATE INDEX on {} ({})'.format(table_name, index_attribute)
-    cursor = transaction_executor.execute_statement(statement)
+    cursor = driver.execute_lambda(lambda executor: executor.execute_statement(statement))
     return len(list(cursor))
 
 
@@ -51,21 +51,15 @@ if __name__ == '__main__':
     """
     Create indexes on tables in a particular ledger.
     """
-    logger.info('Creating indexes on all tables in a single transaction...')
+    logger.info('Creating indexes on all tables...')
     try:
         with create_qldb_driver() as driver:
-            driver.execute_lambda(lambda x: create_index(x, Constants.PERSON_TABLE_NAME,
-                                                          Constants.GOV_ID_INDEX_NAME)
-                                   and create_index(x, Constants.VEHICLE_TABLE_NAME,
-                                                    Constants.VEHICLE_VIN_INDEX_NAME)
-                                   and create_index(x, Constants.VEHICLE_REGISTRATION_TABLE_NAME,
-                                                    Constants.LICENSE_PLATE_NUMBER_INDEX_NAME)
-                                   and create_index(x, Constants.VEHICLE_REGISTRATION_TABLE_NAME,
-                                                    Constants.VEHICLE_VIN_INDEX_NAME)
-                                   and create_index(x, Constants.DRIVERS_LICENSE_TABLE_NAME,
-                                                    Constants.PERSON_ID_INDEX_NAME)
-                                   and create_index(x, Constants.DRIVERS_LICENSE_TABLE_NAME,
-                                                    Constants.LICENSE_NUMBER_INDEX_NAME))
+            create_index(driver, Constants.PERSON_TABLE_NAME, Constants.GOV_ID_INDEX_NAME)
+            create_index(driver, Constants.VEHICLE_TABLE_NAME, Constants.VEHICLE_VIN_INDEX_NAME)
+            create_index(driver, Constants.VEHICLE_REGISTRATION_TABLE_NAME, Constants.LICENSE_PLATE_NUMBER_INDEX_NAME)
+            create_index(driver, Constants.VEHICLE_REGISTRATION_TABLE_NAME, Constants.VEHICLE_VIN_INDEX_NAME)
+            create_index(driver, Constants.DRIVERS_LICENSE_TABLE_NAME, Constants.PERSON_ID_INDEX_NAME)
+            create_index(driver, Constants.DRIVERS_LICENSE_TABLE_NAME, Constants.LICENSE_NUMBER_INDEX_NAME)
             logger.info('Indexes created successfully.')
     except Exception:
         logger.exception('Unable to create indexes.')
