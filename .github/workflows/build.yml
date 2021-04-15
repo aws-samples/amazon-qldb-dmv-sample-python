@@ -43,4 +43,4 @@ jobs:
     - name: Test with pytest
       run: |
         pip install pytest
-        pytest --ledger_name ${{ matrix.python-version }}-${{ matrix.os }}
+        pytest --ledger_suffix ${{ matrix.python-version }}-${{ matrix.os }}

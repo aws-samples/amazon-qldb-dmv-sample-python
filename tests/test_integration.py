@@ -52,11 +52,13 @@ class TestIntegration(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.role_name = cls.ledger_name + '-role'
-        cls.role_policy_name = cls.ledger_name + '-policy'
-        cls.s3_bucket_name = cls.ledger_name + '-bucket'
-        cls.deletion_ledger_name = cls.ledger_name + '-delete'
-        cls.tag_ledger_name = cls.ledger_name + '-tags'
+        cls.role_name = 'github-actions-' + cls.ledger_suffix + '-role'
+        cls.role_policy_name = 'github-actions-' + cls.ledger_suffix + '-policy'
+        cls.s3_bucket_name = 'github-actions-' + cls.ledger_suffix + '-bucket'
+
+        cls.ledger_name = 'py-dmv-' + cls.ledger_suffix
+        cls.deletion_ledger_name = 'py-dmv-' + cls.ledger_suffix + '-delete'
+        cls.tag_ledger_name = 'py-dmv-' + cls.ledger_suffix + '-tags'
 
         s3_encryption_config = set_up_s3_encryption_configuration()
         cls.role_arn = create_export_role(cls.role_name, s3_encryption_config.get('KmsKeyArn'), cls.role_policy_name,

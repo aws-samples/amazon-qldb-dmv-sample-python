@@ -14,11 +14,11 @@ import pytest
 def pytest_addoption(parser):
     # Collect config values from cmd line or setup.cfg
     parser.addoption(
-        "--ledger_name", action="store", default="", help=""
+        "--ledger_suffix", action="store", default="", help=""
     )
 
 
 @pytest.fixture(scope='class', autouse=True)
 def config_variables(request):
     # Set as class attribute on the invoking test context.
-    request.cls.ledger_name = request.config.getoption("--ledger_name").replace(".", "-")
+    request.cls.ledger_suffix = request.config.getoption("--ledger_suffix").replace(".", "-")
