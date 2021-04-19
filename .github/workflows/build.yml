@@ -79,7 +79,7 @@ jobs:
             pip install -r requirements.txt
             pip install -e .
         - name: Delete QLDB resources
-        - run: |
+          run: |
             cd tests
 
             if [ -z "${{ needs.build.outputs.job-total }}" ]
