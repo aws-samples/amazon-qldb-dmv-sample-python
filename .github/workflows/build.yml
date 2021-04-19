@@ -7,7 +7,8 @@ on:
     branches: [ master ]
 
 env:
-  job-total: 20
+  # This value needs to match the build matrix configuration job total.
+  job-total: 9
 
 jobs:
   generate-unique-id:
@@ -90,6 +91,7 @@ jobs:
           run: |
             cd tests
 
+            # If the build job was cancelled by user, we will need to use the job-total global environment variable.
             if [ -z "${{ needs.build.outputs.job-total }}" ]
             then
               let total=${{env.job-total}}
