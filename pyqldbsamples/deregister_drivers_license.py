@@ -19,6 +19,7 @@
 from logging import basicConfig, getLogger, INFO
 
 from pyqldbsamples.connect_to_ledger import create_qldb_driver
+from pyqldbsamples.constants import Constants
 from pyqldbsamples.model.sample_data import SampleData, convert_object_to_ion
 
 logger = getLogger(__name__)
@@ -48,14 +49,19 @@ def deregister_drivers_license(driver, license_number):
         logger.error('Error de-registering license, license {} not found.'.format(license_number))
 
 
-if __name__ == '__main__':
+def main(ledger_name=Constants.LEDGER_NAME):
     """
     De-register a driver's license.
     """
     license_number = SampleData.DRIVERS_LICENSE[1]['LicenseNumber']
 
     try:
-        with create_qldb_driver() as driver:
+        with create_qldb_driver(ledger_name) as driver:
             deregister_drivers_license(driver, license_number)
-    except Exception:
+    except Exception as e:
         logger.exception('Error deleting driver license.')
+        raise e
+
+
+if __name__ == '__main__':
+    main()

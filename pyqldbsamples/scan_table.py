@@ -20,6 +20,7 @@ from logging import basicConfig, getLogger, INFO
 
 from pyqldbsamples.model.sample_data import print_result
 from pyqldbsamples.connect_to_ledger import create_qldb_driver
+from pyqldbsamples.constants import Constants
 
 logger = getLogger(__name__)
 basicConfig(level=INFO)
@@ -43,17 +44,22 @@ def scan_table(driver, table_name):
     return driver.execute_lambda(lambda executor: executor.execute_statement(query))
 
 
-if __name__ == '__main__':
+def main(ledger_name=Constants.LEDGER_NAME):
     """
     Scan for all the documents in a table.
     """
     try:
-        with create_qldb_driver() as driver:
+        with create_qldb_driver(ledger_name) as driver:
             # Scan all the tables and print their documents.
             tables = driver.list_tables()
             for table in tables:
                 cursor = scan_table(driver, table)
                 logger.info('Scan successful!')
                 print_result(cursor)
-    except Exception:
+    except Exception as e:
         logger.exception('Unable to scan tables.')
+        raise e
+
+
+if __name__ == '__main__':
+    main()

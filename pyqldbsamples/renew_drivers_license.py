@@ -21,6 +21,7 @@ from datetime import datetime
 
 from pyqldbsamples.model.sample_data import SampleData, convert_object_to_ion, get_document_ids_from_dml_results
 from pyqldbsamples.connect_to_ledger import create_qldb_driver
+from pyqldbsamples.constants import Constants
 
 logger = getLogger(__name__)
 basicConfig(level=INFO)
@@ -106,14 +107,19 @@ def verify_and_renew_license(driver, license_num, valid_from_date, valid_to_date
     renew_drivers_license(driver, valid_from_date, valid_to_date, license_num)
 
 
-if __name__ == '__main__':
+def main(ledger_name=Constants.LEDGER_NAME):
     """
     Find the person associated with a license number.
     Renew a driver's license.
     """
     try:
-        with create_qldb_driver() as driver:
+        with create_qldb_driver(ledger_name) as driver:
             license_number = SampleData.DRIVERS_LICENSE[0]['LicenseNumber']
             verify_and_renew_license(driver, license_number, VALID_FROM_DATE, VALID_TO_DATE)
-    except Exception:
+    except Exception as e:
         logger.exception('Error renewing drivers license.')
+        raise e
+
+
+if __name__ == '__main__':
+    main()

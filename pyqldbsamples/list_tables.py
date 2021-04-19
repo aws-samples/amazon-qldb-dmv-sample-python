@@ -19,20 +19,24 @@
 from logging import basicConfig, getLogger, INFO
 
 from pyqldbsamples.connect_to_ledger import create_qldb_driver
+from pyqldbsamples.constants import Constants
 
 logger = getLogger(__name__)
 basicConfig(level=INFO)
 
 
-def list_tables():
+def list_tables(ledger_name):
     """
     List all tables.
+
+    :type ledger_name: str
+    :param ledger_name: The name of the ledger.
 
     :rtype: list
     :return: List of tables.
     """
     logger.info("Let's list all the tables...")
-    with create_qldb_driver() as driver:
+    with create_qldb_driver(ledger_name) as driver:
         logger.info("Success. List of tables:")
         tables = driver.list_tables()
         for table in tables:
@@ -40,12 +44,16 @@ def list_tables():
     return tables
 
 
-if __name__ == '__main__':
+def main(ledger_name=Constants.LEDGER_NAME):
     """
     List all the tables in the configured ledger in QLDB.
     """
     try:
-        list_tables()
+        list_tables(ledger_name)
     except Exception as e:
         logger.exception('Unable to list tables!')
         raise e
+
+
+if __name__ == '__main__':
+    main()

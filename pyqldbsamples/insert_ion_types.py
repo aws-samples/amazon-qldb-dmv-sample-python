@@ -27,6 +27,7 @@ from amazon.ion.symbols import SymbolToken
 from amazon.ion.core import IonType
 
 from pyqldbsamples.create_table import create_table
+from pyqldbsamples.constants import Constants
 from pyqldbsamples.insert_document import insert_documents
 from pyqldbsamples.model.sample_data import convert_object_to_ion
 from pyqldbsamples.connect_to_ledger import create_qldb_driver
@@ -181,13 +182,18 @@ def insert_and_verify_ion_types(driver):
     delete_table(driver, TABLE_NAME)
 
 
-if __name__ == '__main__':
+def main(ledger_name=Constants.LEDGER_NAME):
     """
     Insert all the supported Ion types and Python values that are convertible to Ion into a ledger and verify that they
     are stored and can be retrieved properly, retaining their original properties.
     """
     try:
-        with create_qldb_driver() as driver:
+        with create_qldb_driver(ledger_name) as driver:
             insert_and_verify_ion_types(driver)
-    except Exception:
+    except Exception as e:
         logger.exception('Error updating and validating Ion types.')
+        raise e
+
+
+if __name__ == '__main__':
+    main()

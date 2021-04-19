@@ -97,18 +97,23 @@ def list_tags(resource_arn):
     return result
 
 
-if __name__ == '__main__':
+def main(ledger_name=Constants.LEDGER_NAME_WITH_TAGS):
     """
     Tagging and un-tagging resources, including tag on create.
     """
     try:
-        result = create_with_tags(Constants.LEDGER_NAME_WITH_TAGS, CREATE_TAGS)
-        wait_for_active(Constants.LEDGER_NAME_WITH_TAGS)
+        result = create_with_tags(ledger_name, CREATE_TAGS)
+        wait_for_active(ledger_name)
         ARN = result.get('Arn')
         list_tags(ARN)
         untag_resource(ARN, REMOVE_TAGS)
         list_tags(ARN)
         tag_resource(ARN, ADD_TAGS)
         list_tags(ARN)
-    except Exception:
+    except Exception as e:
         logger.exception('Unable to tag or untag resources!')
+        raise e
+
+
+if __name__ == '__main__':
+    main()

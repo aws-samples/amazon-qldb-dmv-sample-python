@@ -53,14 +53,19 @@ def create_qldb_driver(ledger_name=Constants.LEDGER_NAME, region_name=None, endp
     return qldb_driver
 
 
-if __name__ == '__main__':
+def main(ledger_name=Constants.LEDGER_NAME):
     """
     Connect to a given ledger using default settings.
     """
     try:
-        with create_qldb_driver() as driver:
+        with create_qldb_driver(ledger_name) as driver:
             logger.info('Listing table names ')
             for table in driver.list_tables():
                 logger.info(table)
-    except ClientError:
+    except ClientError as ce:
         logger.exception('Unable to list tables.')
+        raise ce
+
+
+if __name__ == '__main__':
+    main()

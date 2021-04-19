@@ -41,11 +41,16 @@ def describe_ledger(ledger_name):
     return result
 
 
-if __name__ == '__main__':
+def main(ledger_name=Constants.LEDGER_NAME):
     """
     Describe a QLDB ledger.
     """
     try:
-        describe_ledger(Constants.LEDGER_NAME)
-    except Exception:
+        describe_ledger(ledger_name)
+    except Exception as e:
         logger.exception('Unable to describe a ledger.')
+        raise e
+
+
+if __name__ == '__main__':
+    main()

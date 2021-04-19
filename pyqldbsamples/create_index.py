@@ -47,13 +47,13 @@ def create_index(driver, table_name, index_attribute):
     return len(list(cursor))
 
 
-if __name__ == '__main__':
+def main(ledger_name=Constants.LEDGER_NAME):
     """
     Create indexes on tables in a particular ledger.
     """
     logger.info('Creating indexes on all tables...')
     try:
-        with create_qldb_driver() as driver:
+        with create_qldb_driver(ledger_name) as driver:
             create_index(driver, Constants.PERSON_TABLE_NAME, Constants.GOV_ID_INDEX_NAME)
             create_index(driver, Constants.VEHICLE_TABLE_NAME, Constants.VEHICLE_VIN_INDEX_NAME)
             create_index(driver, Constants.VEHICLE_REGISTRATION_TABLE_NAME, Constants.LICENSE_PLATE_NUMBER_INDEX_NAME)
@@ -61,5 +61,10 @@ if __name__ == '__main__':
             create_index(driver, Constants.DRIVERS_LICENSE_TABLE_NAME, Constants.PERSON_ID_INDEX_NAME)
             create_index(driver, Constants.DRIVERS_LICENSE_TABLE_NAME, Constants.LICENSE_NUMBER_INDEX_NAME)
             logger.info('Indexes created successfully.')
-    except Exception:
+    except Exception as e:
         logger.exception('Unable to create indexes.')
+        raise e
+
+
+if __name__ == '__main__':
+    main()

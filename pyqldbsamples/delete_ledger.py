@@ -84,14 +84,18 @@ def set_deletion_protection(ledger_name, deletion_protection):
     logger.info('Success. Ledger updated: {}'.format(result))
 
 
-if __name__ == '__main__':
+def main(ledger_name=Constants.LEDGER_NAME):
     """
     Delete a ledger.
     """
     try:
-        set_deletion_protection(Constants.LEDGER_NAME, False)
-        delete_ledger(Constants.LEDGER_NAME)
-        wait_for_deleted(Constants.LEDGER_NAME)
+        set_deletion_protection(ledger_name, False)
+        delete_ledger(ledger_name)
+        wait_for_deleted(ledger_name)
     except Exception as e:
         logger.exception('Unable to delete the ledger.')
         raise e
+
+
+if __name__ == '__main__':
+    main()

@@ -226,7 +226,7 @@ def create_export_and_wait_for_completion(name, bucket, prefix, encryption_confi
         end_time = datetime.utcnow()
 
         result = create_export(name, start_time, end_time, bucket, prefix, encryption_config, role_arn)
-        wait_for_export_to_complete(Constants.LEDGER_NAME, result.get('ExportId'))
+        wait_for_export_to_complete(name, result.get('ExportId'))
         logger.info('JournalS3Export for exportId {} is completed.'.format(result.get('ExportId')))
         return result
     except Exception as e:
@@ -280,27 +280,27 @@ def create_export(ledger_name, start_time, end_time, s3_bucket_name, s3_prefix, 
         raise ipe
 
 
-if __name__ == '__main__':
+def main(ledger_name=Constants.LEDGER_NAME):
     """
     Export a journal to S3.
-    
+
     This code requires an S3 bucket. You can provide the name of an S3 bucket that
     you wish to use via the arguments (args[0]). The code will check if the bucket
     exists and create it if not. If you don't provide a bucket name, the code will
     create a unique bucket for the purposes of this tutorial.
-    
+
     Optionally, you can provide an IAM role ARN to use for the journal export via
     the arguments (args[1]). Otherwise, the code will create and use a role named
     "QLDBTutorialJournalExportRole".
-    
+
     S3 Export Encryption:
     Optionally, you can provide a KMS key ARN to use for S3-KMS encryption, via
     the arguments (args[2]). The tutorial code will fail if you provide a KMS key
     ARN that doesn't exist.
-    
+
     If KMS Key ARN is not provided, the Tutorial Code will use
     SSE-S3 for the S3 Export.
-    
+
     If provided, the target KMS Key is expected to have at least the following
     KeyPolicy:
     -------------
@@ -346,6 +346,9 @@ if __name__ == '__main__':
 
     s3_encryption_config = set_up_s3_encryption_configuration(kms_arn)
 
-    export_result = create_export_and_wait_for_completion(Constants.LEDGER_NAME, s3_bucket_name,
-                                                          Constants.LEDGER_NAME + '/',
-                                                          s3_encryption_config, role_arn)
+    return create_export_and_wait_for_completion(ledger_name, s3_bucket_name, ledger_name + '/',
+                                                 s3_encryption_config, role_arn)
+
+
+if __name__ == '__main__':
+    main()
