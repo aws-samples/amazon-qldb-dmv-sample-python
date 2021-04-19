@@ -8,7 +8,7 @@
 # or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 # CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
 # and limitations under the License.
-from time import time
+from time import time, sleep
 from sys import argv
 
 from boto3 import resource
@@ -25,6 +25,7 @@ def poll_for_table_creation(ledger_name):
         count = len(list(tables))
         if count == 4 or time() > max_poll_time:
             break
+        sleep(3)
 
 
 def force_delete_ledger(ledger_name):
