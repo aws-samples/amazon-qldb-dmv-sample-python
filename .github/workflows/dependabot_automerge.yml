@@ -27,4 +27,4 @@ jobs:
               repo: context.payload.repository.name,
               pull_number: ${{env.pull_request_number}},
             })
-          github-token: ${{github.token}}
+          github-token: ${{secrets.WRITE_TOKEN}}
