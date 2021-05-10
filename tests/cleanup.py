@@ -100,13 +100,12 @@ def get_tag_ledger_name(ledger_suffix):
 
 def delete_resources(ledger_suffix):
     role_name = get_role_name(ledger_suffix)
-    role_policy_name = get_role_policy_name(ledger_suffix)
     s3_bucket_name = get_s3_bucket_name(ledger_suffix)
     ledger_name = get_ledger_name(ledger_suffix)
     deletion_ledger_name = get_deletion_ledger_name(ledger_suffix)
     tag_ledger_name = get_deletion_ledger_name(ledger_suffix)
 
-    force_delete_role_policies(role_policy_name)
+    force_delete_role_policies(role_name)
     force_delete_role(role_name)
     force_delete_s3_bucket(s3_bucket_name)
 
