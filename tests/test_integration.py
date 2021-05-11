@@ -56,11 +56,11 @@ class TestIntegration(TestCase):
         cls.deletion_ledger_name = get_deletion_ledger_name(cls.ledger_suffix)
         cls.tag_ledger_name = get_deletion_ledger_name(cls.ledger_suffix)
 
+        delete_resources(cls.ledger_suffix)
+
         s3_encryption_config = set_up_s3_encryption_configuration()
         cls.role_arn = create_export_role(cls.role_name, s3_encryption_config.get('KmsKeyArn'), cls.role_policy_name,
                                           cls.s3_bucket_name)
-
-        delete_resources(cls.ledger_suffix)
 
         create_ledger_main(cls.ledger_name)
         create_table_main(cls.ledger_name)
