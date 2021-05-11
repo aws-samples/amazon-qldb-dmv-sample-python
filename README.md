@@ -12,6 +12,8 @@ For our tutorial, see [Python and Amazon QLDB](https://docs.aws.amazon.com/qldb/
 
 See [Accessing Amazon QLDB](https://docs.aws.amazon.com/qldb/latest/developerguide/accessing.html) for information on connecting to AWS.
 
+See [Setting Region](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/quickstart.html#configuration) page for more information on using the AWS SDK for Python. You will need to set a region before running the sample code.
+
 ### Required Python versions
 
 DMV Sample App v1.x requires Python 3.4 or later.
