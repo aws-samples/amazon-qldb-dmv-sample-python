@@ -48,7 +48,6 @@ def list_all_journal_exports():
         if result.get('JournalS3Exports') != []:
             list_of_results.append(result.get('JournalS3Exports'))
     logger.info('Success. List of journal exports: {}.'.format(list_of_results))
-    return list_of_results
 
 
 def list_journal_export_with_ledger_name(ledger_name):
@@ -75,7 +74,6 @@ def list_journal_export_with_ledger_name(ledger_name):
         if result.get('JournalS3Exports') != []:
             list_of_results.append(result.get('JournalS3Exports'))
     logger.info('Success. List of journal exports: {}.'.format(list_of_results))
-    return list_of_results
 
 
 def main(ledger_name=Constants.LEDGER_NAME):
