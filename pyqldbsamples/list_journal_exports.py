@@ -31,9 +31,6 @@ qldb_client = client('qldb')
 def list_all_journal_exports():
     """
     List all journal exports.
-
-    :rtype: dict
-    :return: The response of the request.
     """
     logger.info("Let's list journal exports for the AWS account.")
 
@@ -56,9 +53,6 @@ def list_journal_export_with_ledger_name(ledger_name):
 
     :type ledger_name: str
     :param ledger_name: Name of the ledger to list journal exports for.
-
-    :rtype: dict
-    :return: The response of the request.
     """
     logger.info("Let's list journal exports for the ledger with name: {}...".format(ledger_name))
 
