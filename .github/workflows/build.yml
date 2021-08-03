@@ -8,7 +8,7 @@ on:
 
 env:
   # This value needs to match the build matrix configuration job total.
-  job-total: 9
+  job-total: 12
 
 jobs:
   generate-unique-id:
@@ -24,7 +24,7 @@ jobs:
     needs: [generate-unique-id]
     runs-on: ${{ matrix.os }}
     strategy:
-      max-parallel: 5
+      max-parallel: 3
       matrix :
         os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: [3.6, 3.7, 3.8, 3.9]
