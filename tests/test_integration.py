@@ -40,7 +40,7 @@ from pyqldbsamples.tag_resource import main as tag_resource_main
 from pyqldbsamples.transfer_vehicle_ownership import main as transfer_vehicle_ownership_main
 from pyqldbsamples.validate_qldb_hash_chain import main as validate_qldb_hash_chain_main
 from tests.cleanup import get_deletion_ledger_name, get_ledger_name, get_role_name, get_role_policy_name, \
-    get_s3_bucket_name, delete_resources, poll_for_table_creation
+    get_s3_bucket_name, get_tag_ledger_name, delete_resources, poll_for_table_creation
 
 
 # The following tests only run the samples.
@@ -54,7 +54,7 @@ class TestIntegration(TestCase):
         cls.s3_bucket_name = get_s3_bucket_name(cls.ledger_suffix)
         cls.ledger_name = get_ledger_name(cls.ledger_suffix)
         cls.deletion_ledger_name = get_deletion_ledger_name(cls.ledger_suffix)
-        cls.tag_ledger_name = get_deletion_ledger_name(cls.ledger_suffix)
+        cls.tag_ledger_name = get_tag_ledger_name(cls.ledger_suffix)
 
         delete_resources(cls.ledger_suffix)
 
