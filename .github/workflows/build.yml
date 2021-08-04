@@ -8,7 +8,7 @@ on:
 
 env:
   # This value needs to match the build matrix configuration job total.
-  job-total: 9
+  job-total: 12
 
 jobs:
   generate-unique-id:
