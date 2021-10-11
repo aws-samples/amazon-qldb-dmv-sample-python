@@ -1,4 +1,4 @@
 amazon.ion~=0.7.0
-boto3~=1.18.48
+boto3~=1.18.58
 botocore~=1.21.49
 pyqldb>=3.1.0,<4
