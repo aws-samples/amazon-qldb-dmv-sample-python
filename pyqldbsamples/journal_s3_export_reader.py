@@ -177,5 +177,6 @@ def read_export(describe_journal_export_result, s3_client):
         s3_object = s3_client.get_object(Bucket=bucket_name, Key=key)['Body'].read().decode('utf-8')
         blocks = get_journal_blocks(s3_object)
         compare_key_with_content_range(key, blocks[0], blocks[len(blocks) - 1])
-        journal_blocks.append(blocks)
+        # `blocks` is also a list of journal blocks, so we need to concatenate them.
+        journal_blocks.extend(blocks)
     return journal_blocks

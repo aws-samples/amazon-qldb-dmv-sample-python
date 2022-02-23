@@ -24,10 +24,10 @@ jobs:
     needs: [generate-unique-id]
     runs-on: ${{ matrix.os }}
     strategy:
-      max-parallel: 5
+      max-parallel: 6
       matrix :
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: [3.6, 3.7, 3.8, 3.9]
+        os: [ubuntu-latest, windows-2019, macos-latest]
+        python-version: ['3.7', '3.8', '3.9', '3.10']
     steps:
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v1
