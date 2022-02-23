@@ -30,6 +30,12 @@ Install Python QLDB driver and other dependencies using pip:
 pip install -r requirements.txt
 ```
 
+If you are using a different IDE than IntellJ, run:
+
+```
+pip install -e .
+```
+
 ## Running the Sample code
 
 The sample code creates a ledger with tables and indexes, and inserts some documents into those tables,
