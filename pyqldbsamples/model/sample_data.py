@@ -272,8 +272,8 @@ def get_document_ids(transaction_executor, table_name, field, value):
     :rtype: list
     :return: A list of document IDs.
     """
-    query = "SELECT id FROM {} AS t BY id WHERE t.{} = '{}'".format(table_name, field, value)
-    cursor = transaction_executor.execute_statement(query)
+    query = "SELECT id FROM {} AS t BY id WHERE t.{} = ?".format(table_name, field)
+    cursor = transaction_executor.execute_statement(query, convert_object_to_ion(value))
     return list(map(lambda table: table.get('id'), cursor))
 
 
