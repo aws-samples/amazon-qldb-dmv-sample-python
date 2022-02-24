@@ -88,10 +88,10 @@ def add_secondary_owner_for_vin(driver, vin, parameter):
                       statement.
     """
     logger.info('Inserting secondary owner for vehicle with VIN: {}...'.format(vin))
-    statement = "FROM VehicleRegistration AS v WHERE v.VIN = '{}' INSERT INTO v.Owners.SecondaryOwners VALUE ?"\
-        .format(vin)
+    statement = "FROM VehicleRegistration AS v WHERE v.VIN = ? INSERT INTO v.Owners.SecondaryOwners VALUE ?"
 
-    cursor = driver.execute_lambda(lambda executor: executor.execute_statement(statement, parameter))
+    cursor = driver.execute_lambda(lambda executor: executor.execute_statement(statement, convert_object_to_ion(vin),
+                                                                               parameter))
     logger.info('VehicleRegistration Document IDs which had secondary owners added: ')
     print_result(cursor)
 
