@@ -252,6 +252,14 @@ def to_ion_struct(key, value):
     ion_struct[key] = value
     return loads(str(ion_struct))
 
+def to_ion_symbol(obj):
+    if isinstance(obj, IonPyText):
+        return loads(obj)
+    elif isinstance(obj, IonPySymbol):
+        return obj
+    else:
+        raise Exception("Expect obj to be either IonPyText or IonPySymbol")
+
 
 def get_document_ids(transaction_executor, table_name, field, value):
     """

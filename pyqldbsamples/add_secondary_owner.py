@@ -19,10 +19,11 @@
 from logging import basicConfig, getLogger, INFO
 
 from pyqldbsamples.model.sample_data import to_ion_struct, get_document_ids, print_result, SampleData, \
-    convert_object_to_ion
+    convert_object_to_ion, to_ion_symbol
 from pyqldbsamples.constants import Constants
 from pyqldbsamples.connect_to_ledger import create_qldb_driver
-from amazon.ion.simple_types import IonPyText
+from amazon.ion.simple_types import IonPyText, IonPySymbol
+from amazon.ion.simpleion import dumps, loads
 
 logger = getLogger(__name__)
 basicConfig(level=INFO)
@@ -67,8 +68,8 @@ def is_secondary_owner_for_vehicle(driver, vin, secondary_owner_id):
     rows = driver.execute_lambda(lambda executor: executor.execute_statement(query, convert_object_to_ion(vin)))
 
     for row in rows:
-        secondary_owners = row.get('SecondaryOwners')
-        person_ids = map(lambda owner: owner.get('PersonId') if isinstance(owner.get('PersonId'), IonPyText) else owner.get('PersonId').text, secondary_owners)
+        secondary_owners = list(filter(bool, row.get('SecondaryOwners'))) # filter out None
+        person_ids = map(lambda owner: to_ion_symbol(owner.get('PersonId')).text, secondary_owners)
         if secondary_owner_id in person_ids:
             return True
     return False
