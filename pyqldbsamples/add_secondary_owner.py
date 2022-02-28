@@ -67,7 +67,7 @@ def is_secondary_owner_for_vehicle(driver, vin, secondary_owner_id):
 
     for row in rows:
         secondary_owners = row.get('SecondaryOwners')
-        person_ids = map(lambda owner: owner.get('PersonId'), secondary_owners)
+        person_ids = map(lambda owner: owner.get('PersonId').text, secondary_owners)
         if secondary_owner_id in person_ids:
             return True
     return False
