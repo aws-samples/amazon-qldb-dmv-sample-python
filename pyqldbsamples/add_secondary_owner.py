@@ -22,7 +22,6 @@ from pyqldbsamples.model.sample_data import to_ion_struct, get_document_ids, pri
     convert_object_to_ion
 from pyqldbsamples.constants import Constants
 from pyqldbsamples.connect_to_ledger import create_qldb_driver
-from amazon.ion.simple_types import IonPyText
 
 logger = getLogger(__name__)
 basicConfig(level=INFO)
@@ -68,7 +67,7 @@ def is_secondary_owner_for_vehicle(driver, vin, secondary_owner_id):
 
     for row in rows:
         secondary_owners = row.get('SecondaryOwners')
-        person_ids = map(lambda owner: owner.get('PersonId') if isinstance(owner.get('PersonId'), IonPyText) else owner.get('PersonId').text, secondary_owners)
+        person_ids = map(lambda owner: owner.get('PersonId'), secondary_owners)
         if secondary_owner_id in person_ids:
             return True
     return False
