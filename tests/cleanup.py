@@ -103,7 +103,7 @@ def delete_resources(ledger_suffix):
     s3_bucket_name = get_s3_bucket_name(ledger_suffix)
     ledger_name = get_ledger_name(ledger_suffix)
     deletion_ledger_name = get_deletion_ledger_name(ledger_suffix)
-    tag_ledger_name = get_deletion_ledger_name(ledger_suffix)
+    tag_ledger_name = get_tag_ledger_name(ledger_suffix)
 
     force_delete_role_policies(role_name)
     force_delete_role(role_name)

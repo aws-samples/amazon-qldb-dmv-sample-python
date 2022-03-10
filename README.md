@@ -18,7 +18,7 @@ See [Setting Region](https://boto3.amazonaws.com/v1/documentation/api/latest/gui
 
 DMV Sample App v1.x requires Python 3.4 or later.
 
-DMV Sample App v2.x requires Python 3.6 or later. 
+DMV Sample App v2.x requires Python 3.7 or later.
 
 Please see the link below for more detail to install Python:
 
