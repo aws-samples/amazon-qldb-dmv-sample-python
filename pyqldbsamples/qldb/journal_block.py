@@ -20,7 +20,7 @@ class JournalBlock:
     Represents a JournalBlock that was recorded after executing a transaction in the ledger.
     """
     def __init__(self, block_address, transaction_id, block_timestamp, block_hash, entries_hash, previous_block_hash,
-                 entries_hash_list, transaction_info, revisions):
+                 entries_hash_list, transaction_info, redaction_info, revisions):
         self.block_address = block_address
         self.transaction_id = transaction_id
         self.block_timestamp = block_timestamp
@@ -29,6 +29,7 @@ class JournalBlock:
         self.previous_block_hash = previous_block_hash
         self.entries_hash_list = entries_hash_list
         self.transaction_info = transaction_info
+        self.redaction_info = redaction_info
         self.revisions = revisions
 
 
@@ -50,8 +51,9 @@ def from_ion(ion_value):
     previous_block_hash = ion_value.get('previousBlockHash')
     entries_hash_list = ion_value.get('entriesHashList')
     transaction_info = ion_value.get('transactionInfo')
+    redaction_info = ion_value.get('redactionInfo')
     revisions = ion_value.get('revisions')
 
     journal_block = JournalBlock(block_address, transaction_id, block_timestamp, block_hash, entries_hash,
-                                 previous_block_hash, entries_hash_list, transaction_info, revisions)
+                                 previous_block_hash, entries_hash_list, transaction_info, redaction_info, revisions)
     return journal_block
