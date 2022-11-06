@@ -305,6 +305,16 @@ def print_result(cursor):
     result_counter = 0
     for row in cursor:
         # Each row would be in Ion format.
-        logger.info(dumps(row, binary=False, indent='  ', omit_version_marker=True))
+        print_ion(row)
         result_counter += 1
     return result_counter
+
+
+def print_ion(ion_value):
+    """
+    Pretty print an Ion Value.
+
+    :type ion_value: :py:class:`amazon.ion.simple_types.IonPySymbol`
+    :param ion_value: Any Ion Value to be pretty printed.
+    """
+    logger.info(dumps(ion_value, binary=False, indent='  ', omit_version_marker=True))
