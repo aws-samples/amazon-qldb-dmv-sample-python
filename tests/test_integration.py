@@ -33,6 +33,7 @@ from pyqldbsamples.list_journal_exports import main as list_journal_exports_main
 from pyqldbsamples.list_ledgers import main as list_ledgers_main
 from pyqldbsamples.list_tables import main as list_tables_main
 from pyqldbsamples.query_history import main as query_history_main
+from pyqldbsamples.redact_revision import main as redact_revision_main
 from pyqldbsamples.register_drivers_license import main as register_drivers_license_main
 from pyqldbsamples.renew_drivers_license import main as renew_drivers_license_main
 from pyqldbsamples.scan_table import main as scan_table_main
@@ -111,6 +112,9 @@ class TestIntegration(TestCase):
 
     def test_query_history(self):
         query_history_main(self.ledger_name)
+
+    def test_redact_revision(self):
+        redact_revision_main(self.ledger_name)
 
     def test_list_tables(self):
         list_tables_main(self.ledger_name)
