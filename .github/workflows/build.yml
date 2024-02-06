@@ -20,7 +20,7 @@ jobs:
     steps:
       - name: Generate unique id
         id: unique_id
-        run: echo "::set-output name=id::$RANDOM"
+        run: echo "id=$RANDOM" >> "$GITHUB_OUTPUT"
     outputs:
       id: ${{ steps.unique_id.outputs.id }}
 
@@ -59,7 +59,7 @@ jobs:
     - name: Test with pytest
       id: test
       run: |
-        echo "::set-output name=job-total::${{ strategy.job-total }}"
+        echo "job-total=${{ strategy.job-total }}" >> "$GITHUB_OUTPUT"
         pip install pytest
         pytest --ledger_suffix ${{ needs.generate-unique-id.outputs.id}}${{ strategy.job-index }}
     outputs:
